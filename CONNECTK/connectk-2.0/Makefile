@@ -190,6 +190,7 @@ connectk_SOURCES = \
 EXTRA_DIST = win32
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
+	cp connectk ../../DEMO
 
 .SUFFIXES:
 .SUFFIXES: .c .o .obj

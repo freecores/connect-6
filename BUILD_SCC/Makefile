@@ -40,30 +40,36 @@ clean:
 fpga: synth altera_synth test
 	cp cp ./rtl_package/synth/altera_fpga/run/DE2.sof ../DEMO
 
-synth: all imp_connect
-imp_window:
+synth: imp_connect.tag
+imp_window.tag:
 	#sed -s 's/\\TCAB_NAME/threat_window/g' main.cpp.base >main.cpp
 	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_window.tcl
-imp_line: imp_window
+	echo "Done" > imp_window.tag
+imp_line.tag: imp_window.tag
 	#sed -s 's/\\TCAB_NAME/threat_line/g' main.cpp.base >main.cpp
 	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_line.tcl
-imp_marks:
+	echo "Done" > imp_line.tag
+imp_marks.tag:
 	#sed -s 's/\\TCAB_NAME/ai_mraks/g' main.cpp.base >main.cpp
 	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_marks.tcl
-imp_threat: imp_line imp_marks
+	echo "Done" > imp_marks.tag
+imp_threat.tag: imp_line.tag imp_marks.tag
 	#sed -s 's/\\TCAB_NAME/ai_threats/g' main.cpp.base >main.cpp
 	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_threat.tcl
-imp_adjacent:
+	echo "Done" > imp_threat.tag
+imp_adjacent.tag:
 	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	#sed -s 's/\\TCAB_NAME/ai_adjacent/g' main.cpp.base >main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_adjacent.tcl
-imp_connect: imp_threat  imp_adjacent
+	echo "Done" > imp_adjacent.tag
+imp_connect.tag: imp_threat.tag  imp_adjacent.tag
 	sed -s 's/\\TCAB_NAME/connect6ai_synth/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_connect.tcl
+	echo "Done" > imp_connect.tag
 
 altera_synth:
 	cp -r ./imp_connect/rtl_package/ ./
@@ -94,4 +100,4 @@ altera_clean:
 	rm -rf ./rtl_package/
 	
 ultraclean: altera_clean
-	rm -rf imp_line imp_marks imp_threat imp_choose imp_adjacent imp_connect imp_window Logs
+	rm -rf *.tag imp_line imp_marks imp_threat imp_choose imp_adjacent imp_connect imp_window Logs

@@ -42,7 +42,7 @@ csim  -preprocess  -cexec_args "-port /dev/ttyS0 -player L"
 schedule 
 csim  -schedule  -cexec_args "-port /dev/ttyS0 -player L"
 synthesize 
-csim -synthesize -dump_memory_access_trace -sim_after_synth_phase 5
+#csim -synthesize -dump_memory_access_trace -sim_after_synth_phase 5
 create_rtl_package 
 
 #set_implementation_params -simulator modelsim

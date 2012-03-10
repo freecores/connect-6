@@ -72,7 +72,7 @@ SEG7_LUT_8 			u0	(	HEX0,HEX1,HEX2,HEX3,HEX4,HEX5,HEX6,HEX7,mSEG7_DIG );
 
 wire mTXD_Done_not;
 RS232_Controller 	u1_bis(		.iDATA(mTXD_DATA),.iTxD_Start(mTXD_Start),.oTxD_Busy(mTXD_Done_not),
-							.oDATA(mRXD_DATA),.oRxD_Ready(mRXD_Ready),.iCLK(OSC_50),.RST_n(KEY[0]),
+							.oDATA(mRXD_DATA),.oRxD_Ready(mRXD_Ready),.iCLK(OSC_27),.RST_n(KEY[0]),
 							.oTxD(UART_TXD),.iRxD(UART_RXD));
 assign mTXD_Done = !mTXD_Done_not;
 assign LED_RED[9] = mTXD_Done_not;
@@ -88,7 +88,7 @@ CMD_Decode			u5	(	//	USB JTAG
 							.iRXD_DATA(mRXD_DATA),.iRXD_Ready(mRXD_Ready),
 						 	.oTXD_DATA(mTXD_DATA),.oTXD_Start(mTXD_Start),.iTXD_Done(mTXD_Done),
 							//	Control
-						 	.iCLK(OSC_50),.iRST_n(KEY[0]), .oAI_RSTn(mAI_RSTn),
+						 	.iCLK(OSC_27),.iRST_n(KEY[0]), .oAI_RSTn(mAI_RSTn),
 							//AI
 							.oAI_DATA(DATA_to_AI),
 							.iAI_DATA(DATA_from_AI),
@@ -103,7 +103,7 @@ AI 			inst_AI (
 							.oAI_Done(mAI_Done),
 							
 							//	Control
-						 	.iCLK(OSC_50),.iRST_n(mAI_RSTn)	);
+						 	.iCLK(OSC_27),.iRST_n(mAI_RSTn)	);
 wire [63:0] CMD_Tmp;					
 
 //assign	mSEG7_DIG	=	{	CMD_Tmp[31:28],CMD_Tmp[27:24],CMD_Tmp[23:20],CMD_Tmp[19:16],

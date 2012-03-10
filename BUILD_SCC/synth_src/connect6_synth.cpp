@@ -13,7 +13,9 @@
 //#include "connect6.h"
 //#include<stdio.h>
 #include "./shared.h"
-//#include "pico.h"
+//#ifdef PICO_SYSC_SIM
+#include "pico.h"
+//#endif
 
 // Subtract this many points for moves at the edges.
 #define EDGEPENALTY 5
@@ -108,8 +110,12 @@ static int char_to_int(short x){
 //                                aimoves_choose(moves, move);
 //                        }
 //}
+int id;
 int connect6ai_synth(int firstmove,char movein[8], char colour, char moveout[8]){
-	//int id= PICO_initialize_PPA(ai_threats);	
+	//#ifdef PICO_SYSC_SIM
+	//id= PICO_initialize_PPA(ai_threats);	
+	//PICO_set_task_overlap(id, 2);
+	//#endif
 	#pragma bitsize firstmove 17
 	char moveoutm[8];
 	#pragma internal_blockram moveoutm
@@ -119,6 +125,7 @@ int connect6ai_synth(int firstmove,char movein[8], char colour, char moveout[8])
 	//#pragma read_write_ports board.data combined 2
 	//#pragma preserve_array myboard.data 
 	#pragma internal_blockram myboard
+	//#pragma multi_buffer myboard 2
 	//#pragma no_memory_analysis myboard
 	static unsigned int current_random = 10;
 	AIMove move,move_threat,move_adj;
@@ -163,6 +170,8 @@ int connect6ai_synth(int firstmove,char movein[8], char colour, char moveout[8])
 	int i;
 	#pragma bitsize i 6
 
+	//#pragma num_iterations(1,2,2)
+	//#pragma unroll
 	for(i=myboard.moves_left;i>0;i--){
         	  //aimoves_free(&moves);
 			move.x=-1;
@@ -244,7 +253,10 @@ int connect6ai_synth(int firstmove,char movein[8], char colour, char moveout[8])
 	//	/// Convert the int coordinates to corresponding ASCII chars
 	//move_to_ascii(move.x+1,move.y+1,&moveout[4]);		
 	//}
+	//#ifdef PICO_SYSC_SIM
+	//PICO_sync_task(id, 1);
 	//PICO_finalize_PPA(id);
+	//#endif
 	return 0;
 }
 

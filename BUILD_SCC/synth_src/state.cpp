@@ -27,9 +27,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#include <stdio.h>
 //#include <string.h>
 //#include <math.h>
-#include "./shared.h"
+//#include <iostream>
+#include "shared.h"
+//#include "q.hpp"
 //#include "connectk.h"
-
+#ifdef PICO_SYNTH
+//#include "pico.h"
+#endif
+//#include "./q.hpp"
+using namespace std;
 /*
  *      Allocation chain
  */
@@ -46,6 +52,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * K & R.  Not a great generator, but fast, and good enough for my needs. */
 
 
+//int ready=0;
 void my_srandom(int seed,unsigned int *current_random)
 {
     *current_random = (unsigned int)seed;
@@ -175,13 +182,15 @@ void aimoves_add(AIMoves *moves, const AIMove *move)
         } else
                 moves->data[i].weight += move->weight;
 }
-
+//FIFO(moves_fifo,AIMove);
+//#pragma fifo_length moves_fifo 361
 void aimoves_append(AIMoves *moves, const AIMove *move)
 {
         int i;
 
         if (move->x >= board_size || move->y >= board_size)
                 return;
+	#pragma num_iterations(0,150,361)
         for (i = 0; i < moves->len; i++) {
                 AIMove *aim = moves->data + i;
 
@@ -196,6 +205,7 @@ void aimoves_append(AIMoves *moves, const AIMove *move)
                 return;
         }
         moves->data[moves->len++] = *move;
+	//if(!moves_fifo.full()) moves_fifo.push(*move);
 }
 
 int aimoves_compare(const void *a, const void *b)
@@ -203,24 +213,49 @@ int aimoves_compare(const void *a, const void *b)
         return ((AIMove*)b)->weight - ((AIMove*)a)->weight;
 }
 
-int aimoves_choose(AIMoves *moves, AIMove *move)
+int aimoves_choose(AIMoves *moves, AIMove *move,unsigned int *index)
 {
 	//#pragma read_write_ports moves.data combined 3
 	//#pragma internal_blockram moves
 	//#pragma no_memory_analysis moves
-        int i = 0, top = 0;
+
+        int i = 0;
+        int top;
+	AIMoves moves1;
 	#pragma bitsize i 4
-        if (!moves || !moves->len)
-                return 0;
-        aimoves_sort(moves);
-        for (top = 0; top < moves->len &&
-             moves->data[top].weight == moves->data[0].weight; top++);
-        if (top)
-                //i = my_irand(top,current_random);//g_random_int_range(0, top);
-		i=0;
-	
-        *move = moves->data[i];
-        return 1;
+      //  if (!moves || !moves->len)
+      //          return 0;
+      //  //aimoves_sort(moves);
+      //  for (top = 0; top < moves->len &&
+      //       moves->data[top].weight == moves->data[0].weight; top++);
+      //  if (top)
+      //          //i = my_irand(top,current_random);//g_random_int_range(0, top);
+      //  	i=0;
+      //  
+      //  *move = moves->data[i];
+      //  return 1;
+	/*---------------------------------------
+		Rewritten for Hardware
+	---------------------------------------*/
+        //for (top = 0; top < moves->len; top++){
+	//	if(top==0) {
+	//			 if (!moves)
+        //	        	return 0;
+	//	}
+	//	if(moves->data[index[top]].weight != moves->data[index[0]].weight){
+	//		*move = moves->data[index[i]];
+	//		return 1;
+	//	}
+	//	if(top==moves->len-1) {
+	//		*move = moves->data[index[i]];
+	//		return 1;
+	//	}
+	//}
+        //                return 0;
+	if(!moves|| !moves->len) return 0;
+	else {*move=moves->data[index[i]];return 1;}
+
+
 }
 //
 //void aimoves_crop(AIMoves *moves, unsigned int n)
@@ -389,12 +424,16 @@ void bublesort(AIMove *list, int n)
       for(j=0;j<(n-(i+1));j++)
              if(list[j].weight < list[j+1].weight)
                     swap(&list[j],&list[j+1]);
+				//cout<<"BUBBLESORT"<<":"<<n<<endl;
+				//for(i=0;i<n;i++) cout<<list[i].weight<<",";
+				//cout<<endl;
 }
 //taken from http://cprogramminglanguage.net/c-bubble-sort-source-code.aspx
 void aimoves_sort(AIMoves *moves)
 {
         //qsort(moves->data, moves->len, sizeof (AIMove), aimoves_compare);
 	bublesort(moves->data,moves->len);
+	//streamsort(moves->data,moves->len);
 	
 }
 

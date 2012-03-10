@@ -27,22 +27,22 @@ static unsigned int current_random = 0;
 
 
 char select_AI_colour (int argc, char **argv){
-    char ai_colour;
+    char ai_colour='L';
     int i;
-    //cout<<"Please enter referee AI's colour. L or D"<<endl;
-    //cin >> ai_colour;
-	for(i=0;i<argc; i++){
-          if((strcmp(argv[i],"-player")==0) && (i< (argc+1)) ){
-                   ai_colour= *argv[i+1];
-          }
-  	}
+   // cout<<"Please enter referee AI's colour. L or D"<<endl;
+   // cin >> ai_colour;
+   //     for(i=0;i<argc; i++){
+   //       if((strncmp(argv[i],"-player",7)==0) && (i< (argc+1)) ){
+   //                ai_colour= *argv[i+1];
+   //       }
+   //     }
 
-    while (ai_colour != 'L' && ai_colour != 'D'){
-        cout<<"Invalid colour. Single character L or D"<<endl;
-        cin >> ai_colour;
-    }
+   // while (ai_colour != 'L' && ai_colour != 'D'){
+   //     cout<<"Invalid colour. Single character L or D"<<endl;
+   //     cin >> ai_colour;
+   // }
 
-    cout<<"AI is playing as "<<ai_colour<<endl;
+   // cout<<"AI is playing as "<<ai_colour<<endl;
     return ai_colour;
 }
 
@@ -54,7 +54,7 @@ int select_com_port(int argc, char **argv)
   bool cmd_line_port_set = false;
 
   for(i=0;i<argc; i++){
-	  if((strcmp(argv[i],"-port")==0) && (i< (argc+1)) ){
+	  if((strncmp(argv[i],"-port",5)==0) && (i< (argc+1)) ){
 		  com_port = argv[i+1];
 		  cmd_line_port_set = true;
 	  }

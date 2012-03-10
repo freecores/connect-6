@@ -23,20 +23,115 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#include "config.h"
 //#include <math.h>
 //#include <glib->h>
+//#include <iostream>
 #include "./shared.h"
+//#include "./q.hpp"
+#include "pico.h"
 //#include <stdio.h>
 
 /* Bits per threat level */
 #define BITS_PER_THREAT 6
 
+//FIFO(x,int);
+//#pragma fifo_length x 24
+//#pragma no_inter_loop_stream_analysis pico_stream_input_x
+//#pragma no_inter_loop_stream_analysis pico_stream_output_x
+//#pragma no_inter_task_stream_analysis pico_stream_input_x
+//#pragma no_inter_task_stream_analysis pico_stream_output_x
+/*--------------------------------------------------------------------*/
+#ifdef PICO_SYNTH
+#define Q_ASSERT(_cond, _msg)
+//#include <iostream>
+//#include "pico.h"
+//#include "q.hpp"
+//#include "./shared.h"
+using namespace std;
+#else
+/* not synthesizable */
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <assert.h>
 
-typedef struct {
-        int threat[2];
-        PIECE turn[2];
-} Line;
-typedef struct{
-	int data[MAX_CONNECT_K + 1][2];
-}threat_count_array;
+static void debug_assert (bool cond, char * msg) {
+	if (!cond) {
+		printf("assert failed: %s\n", msg);
+		assert(0);
+	}
+}
+
+#define Q_ASSERT(_cond, _msg) debug_assert(_cond, _msg)
+#endif
+#define max_size 361
+#define ptr_bw 32
+//FIFO(queue,AIMove);
+//#pragma no_inter_loop_stream_analysis pico_stream_input_queue
+//#pragma no_inter_loop_stream_analysis pico_stream_output_queue
+//#pragma no_inter_task_stream_analysis pico_stream_input_queue
+//#pragma no_inter_task_stream_analysis pico_stream_output_queue
+
+//FIFO(queue,AIMove);
+//FIFO_INTERFACE(queue,AIMove);
+//#pragma fifo_length pico_stream_input_queue 800
+//#pragma fifo_length pico_stream_output_queue 800
+//#pragma read_write_port queue separate
+//#pragma bandwidth pico_stream_input_queue 1
+//#pragma bandwidth pico_stream_output_queue 1
+//////template <class tp=AIMove, int max_size=128, int ptr_bw=32>
+////
+////  /* pop front of queue, returning the front data */
+////  /* q is corrupted if pop when empty */
+////  AIMove q::pop (){
+////    /* assert that before pop, queue is not empty (underflow check) */
+////    Q_ASSERT((!wrapped && (head < tail)) || (wrapped && (head >= tail)),
+////    		"queue underflowed");
+////    AIMove d = pico_stream_input_queue();
+////	//cout <<"pop: "<<head<<":"<<tail<<":"<<wrapped<<endl;
+////    if (head == max_size-1) {
+////      head = 0;
+////      wrapped = false;
+////    } else {
+////      head = head + 1;
+////    }
+////    return d;
+////  }
+////
+////  /* push data into back of queue */
+////  /* q is corrupted if push when full */
+////   void q::push (AIMove d){
+////    pico_stream_output_queue(d);
+////    if (tail == max_size-1) {
+////      tail = 0;
+////      wrapped = true;
+////    } else {
+////      tail = tail + 1;
+////    }
+////    /* assert that after push, queue is not empty (overflow check) */
+////    Q_ASSERT((!wrapped && (head < tail)) || (wrapped && (head >= tail)),
+////    		"Queue overflowed") ;
+////	//cout <<"push: "<<head<<":"<<tail<<":"<<wrapped<<endl;
+////  }
+////
+////  /* return current size of the queue */
+////  int q::size (){
+////    if (wrapped) {
+////      return (max_size - head) + (tail - 0);
+////    } else {
+////      return tail - head;
+////    }
+////  }
+/////*--------------------------------------------------------------------*/
+////void test(int ready){
+////	int i;
+////	//for (i=0;i<10;i++) if(ready>1) pico_stream_input_x(); 
+////	//for (i=0;i<10;i++) {if(!moves_fifo1.empty()) moves_fifo1.pop(); }
+////	AIMove m;
+////	while(1) {
+////		if(ready>1) m=pico_stream_input_queue(); 
+////		if(m.weight==-1) break;
+////	}
+////}
+////q moves_fifo1;
 
 static AIWEIGHT threat_bits(int threat, PIECE type, Board *b)
 /* Bit pack the threat value */
@@ -97,7 +192,8 @@ int threat_window(int x, int y, int dx, int dy,
                 return 0;
 
         /* Push forward the maximum and find the window type */
-	#pragma unroll
+	//#pragma unroll
+	//#pragma num_iterations(1,3,6)
         for (maximum = 1; maximum < connect_k; maximum++) {
                 p = piece_at(b, x + dx * maximum, y + dy * maximum);
                 if (p == PIECE_ERROR)
@@ -113,7 +209,8 @@ int threat_window(int x, int y, int dx, int dy,
         maximum--;
 
         /* Try to push the entire window back */
-	#pragma unroll
+	//#pragma unroll
+	//#pragma num_iterations(1,3,6)
         for (minimum = -1; minimum > -connect_k; minimum--) {
                 p = piece_at(b, x + dx * minimum, y + dy * minimum);
                 if (p == PIECE_ERROR || piece_empty(p))
@@ -135,6 +232,8 @@ int threat_window(int x, int y, int dx, int dy,
         /* Push back minimum if we haven't formed a complete window, this window
            can't be a double */
         if (maximum - minimum < connect_k - 1) {
+	//#pragma unroll
+	//#pragma num_iterations(1,3,6)
                 for (minimum--; minimum > maximum - connect_k; minimum--) {
                         p = piece_at(b, x + dx * minimum, y + dy * minimum);
                         if (p == PIECE_ERROR)
@@ -157,7 +256,7 @@ int threat_window(int x, int y, int dx, int dy,
         return 0;
 }
 
-/*static*/ AIWEIGHT threat_line(int x, int y, int dx, int dy,Board *b,Board *bwrite,AIMoves *moves,int k)
+/*static*/ AIWEIGHT threat_line(int x, int y, int dx, int dy,Board *b,Board *bwrite,int k,int loop_bound)
 {
 	
 	//#pragma read_write_ports threat_counts.data combined 2
@@ -165,8 +264,6 @@ int threat_window(int x, int y, int dx, int dy,
 	//#pragma no_memory_analysis threat_counts
 	
 	//#pragma read_write_ports b.data combined 2
-	#pragma internal_blockram b
-	#pragma internal_blockram bwrite
 	//#pragma read_write_ports b.data separate 1 readonly 2 writeonly
 	//#pragma no_memory_analysis b
 	/* This is the line of threats currently being processed */
@@ -245,10 +342,16 @@ int threat_window(int x, int y, int dx, int dy,
         return weight;
 }
 
+FIFO(queue,AIMove);
+//FIFO_INTERFACE(queue,AIMove);
+#pragma fifo_length pico_stream_input_queue 800
+#pragma fifo_length pico_stream_output_queue 800
+#pragma bandwidth pico_stream_input_queue 1
+#pragma bandwidth pico_stream_output_queue 1
 /*AIMoves*/int ai_threats(Board *board,AIMove *move)
 {
 	//#pragma read_write_ports board.data combined 2
-	#pragma internal_blockram board
+	//#pragma internal_blockram board
 	//#pragma no_memory_analysis board
 
 	//#pragma internal_blockram move
@@ -258,13 +361,15 @@ int threat_window(int x, int y, int dx, int dy,
 	/*static*/ Board b;//={0,0,0,0,0,0,0,0,0,0,0,{{0}}} ;//= NULL;
 	//#pragma read_write_ports b.data combined 2
 	#pragma internal_blockram b
+	//#pragma multi_buffer b 2
 	//#pragma read_write_ports b.data separate 1 readonly 2 writeonly
 	//#pragma no_memory_analysis b
 	/*static*/ Board bwrite;//={0,0,0,0,0,0,0,0,0,0,0,{{0}}} ;//= NULL;
 	//#pragma read_write_ports b.data combined 2
 	#pragma internal_blockram bwrite
+	//#pragma multi_buffer bwrite 2
 	//#pragma no_memory_analysis b
-	/*static*/ AIMoves moves;//={{0,0,0,{{0,0,0}}}};
+	/*static*/ AIMoves moves;//={0,0,0,{{0,0,0}}};
 	//#pragma read_write_ports moves.data combined 3
 	#pragma internal_blockram moves
 	//#pragma no_memory_analysis moves
@@ -306,6 +411,8 @@ int threat_window(int x, int y, int dx, int dy,
 /*---------------------------------------------------------------------------*/
 //rewritten for hardware
 /*---------------------------------------------------------------------------*/
+	//int id= PICO_initialize_PPA(threat_line);	
+	//PICO_set_task_overlap(id, 2);
 	int j;
 	int arg1,arg2,arg3,arg4,loop_bound,loop_begin;
 	int k=0;
@@ -408,16 +515,37 @@ int threat_window(int x, int y, int dx, int dy,
 				}
 
 
-                		u_sum += threat_line(arg1, arg2, arg3, arg4,&b,&bwrite,&moves,k);
+                		u_sum += threat_line(arg1, arg2, arg3, arg4,&b,&bwrite,k,loop_bound);
 			}
 	}
+	//PICO_sync_task(id, 1);
+	//PICO_finalize_PPA(id);
 /*---------------------------------------------------------------------------*/
 	//board_copy(&b,&b_marks);
+		unsigned int index[max_size]={0};
+		#pragma bitsize index 9
+		#pragma internal_fast index
+	AIMoves moves1;
+	#pragma internal_blockram moves1
         /*moves = */ ai_marks(&bwrite, PIECE_THREAT(1),&moves);
-        moves.utility = u_sum;
-	if (!aimoves_choose(&moves, move))
+	//test(ready);
+	streamsort(&moves1,&index[0]);
+        //moves1.utility = u_sum;
+        //moves.utility = u_sum;
+	/*----------------------------
+		rewritten for hardware
+	----------------------------*/
+	//if (!aimoves_choose(&moves1, move))
+	//	return 0;
+	//else return 1;		
+	int ret_val;
+	ret_val=aimoves_choose(&moves1, move,&index[0]);
+	if (!ret_val)
 		return 0;
 	else return 1;		
+	/*----------------------------
+	end rewritten for hardware
+	----------------------------*/
         //board_free(b);
         //return moves;
 	//return 0;
@@ -516,15 +644,110 @@ int threat_window(int x, int y, int dx, int dy,
         //AIMoves moves[361];
         AIMove move;
         PIECE p;
+	//moves_fifo.resoet();
+	AIMove m;
+	#pragma num_iterations(19,19,19)
         for (move.y = 0; move.y < board_size; move.y++)
-                for (move.x = 0; move.x < board_size; move.x++)
+	#pragma num_iterations(19,19,19)
+                for (move.x = 0; move.x < board_size; move.x++){
                         if ((p = piece_at(b, move.x, move.y)) >= minimum) {
                                 move.weight = p - PIECE_THREAT0;
                                 aimoves_set(moves, &move);
-                        }
+				pico_stream_output_queue(move);
+				//cout<<"push"<<move.weight<<endl;
+			//ready=ready+1;
+			//cout<<"READY"<<*ready<<endl;
+                        }else {
+			m.weight =-100;
+			pico_stream_output_queue(m);
+				//cout<<"push"<<m.weight<<endl;
+			}
+			//if((move.y == board_size-1) && (move.x == board_size-1)){
+			//	m.weight=-1;m.x=-1;m.y=-1;
+                        //        /*if((ready))*/ {pico_stream_output_queue(m);/*cout<<"push_finish"<<m.weight<<endl;*/}
+			//
+			//}
+		}
+	//moves_fifo.active=0;
         //return moves;
+	int i;
+	//for (i=0;i<10;i++) {*ready=i;pico_stream_output_x(i); }
+	//for (i=0;i<10;i++) {if(!moves_fifo1.full()) moves_fifo1.push(m); }
+	//for (i=0;i<10;i++) {
+	//	*ready=i;pico_stream_output_queue(m); 
+	//	if(i==9){
+	//		m.weight=-1;
+	//		pico_stream_output_queue(m);
+	//	}
+	//		
+	//	}
+	
 }
-
+void streamsort(AIMoves *moves,unsigned int *index){
+/* Insertion sort for streaming*/
+		AIMove val;
+		AIMove data[361]={{-1},{-1},{-1}};
+		//unsigned int index[361];
+		#pragma bitsize index 9
+		#pragma internal_fast index
+		int i,j,k;
+		unsigned int len=0;
+		moves->data[0].weight=-100;
+//		while(1) {
+//			if(!moves_fifo.empty()){ 
+//				val=moves_fifo.pop();
+//				for(i=0;i<len;i++){
+//					if (list[i].weight < val.weight){
+//					for(j=len-1;j>i-1;j--){
+//						list[j+1]=list[j];
+//					}
+//					break;
+//					}
+//				}
+//					list[i]=val;
+//					len++;
+//			}
+//			else break;
+//			//if(!moves_fifo.active && moves_fifo.empty()) break;
+//		}
+		//while(1) {
+		//int count=0;
+		#pragma num_iterations(1,150,1362)
+		for(k=0;k<1362;k++){
+			//count++;
+			//cout<<count<<endl;
+			if (k>1000){
+				
+			//if(ready>5){ 
+				val=pico_stream_input_queue();
+				//cout<<"popped"<<","<<val.weight<<" "<<val.x<<" "<<val.y<<endl;
+				if(val.weight==-1) {moves->len=len;break;}
+				else if(val.weight==-100) continue;
+				#pragma num_iterations(0,150,361)
+				for(i=0;i<len;i++){
+					if (moves->data[index[i]].weight < val.weight){
+					for(j=len-1;j>i-1;j--){
+						//moves->data[j+1]=moves->data[j];
+						index[j+1]=index[j];
+					}
+					break;
+					}
+				}
+					index[i]=len;
+					moves->data[len]=val;
+					len++;
+				//cout<<"STREAMSORT"<<":";
+			//}
+			/*else*/ //{moves->len=len;break;}
+			}
+		}
+		moves->len=len;
+				//cout<<"STREAMSORT"<<":"<<moves->len<<endl;
+				//for(i=0;i<len;i++) cout<<moves->data[i].weight<<",";
+				//cout<<endl;
+				//for(i=0;i<len;i++) cout<<moves->data[index[i]].weight<<",";
+				//cout<<endl;
+}
 static gboolean is_adjacent( Board *b, BCOORD x, BCOORD y, int dist)
 {
         int dx, dy, count;
@@ -551,10 +774,14 @@ static gboolean is_adjacent( Board *b, BCOORD x, BCOORD y, int dist)
 
         move.weight = AIW_NONE;
         //moves = aimoves_new();
-        for (move.y = 0; move.y < board_size; move.y++)
-                for (move.x = 0; move.x < board_size; move.x++)
+	#pragma num_iterations(1,9,19)
+        for (move.y = 0; move.y < board_size; move.y++){
+	#pragma num_iterations(1,9,19)
+                for (move.x = 0; move.x < board_size; move.x++){
                         if (is_adjacent(b, move.x, move.y, dist))
                                 aimoves_append(moves, &move);
+		}
+	}
         //aimoves_shuffle(moves,current_random);
         //return moves;
 }
@@ -572,12 +799,13 @@ static gboolean is_adjacent( Board *b, BCOORD x, BCOORD y, int dist)
 	//#pragma internal_blockram moves
 	//#pragma no_memory_analysis moves
         //AIMove move;
+	unsigned int index[1]={0};
         //AIMoves *moves;
 	moves.len=0;
         /* Get all open tiles adjacent to any piece */
         /*moves =*/ enum_adjacent(b, 1,&moves,current_random);
         if (moves.len){
-        	aimoves_choose(&moves, move);
+        	aimoves_choose(&moves, move,&index[0]);
 		
                 return ;//moves;
 	}

@@ -1,4 +1,5 @@
-
+#ifndef SHARED_H
+#define SHARED_H
 /*
 
 connectk -- a program to play the connect-k family of games
@@ -23,13 +24,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#ifndef TRUE
 #define TRUE 1
 #define FALSE 0
-#define NULL ((void*)0)
+//#define NULL ((void*)0)
 //#endif
 //#ifndef __G_TYPES_H__
 typedef unsigned int gboolean;
 #pragma bitsize gboolean 1
 typedef int gsize;
 //#endif
+#include "pico.h"
 
 
 /*
@@ -304,6 +306,22 @@ typedef struct AIMoves {
 } AIMoves;
 /* An array type for holding move lists */
 
+
+typedef struct {
+        int threat[2];
+        PIECE turn[2];
+} Line;
+typedef struct{
+	int data[MAX_CONNECT_K + 1][2];
+}threat_count_array;
+
+
+
+
+
+
+
+
 AllocChain *aimoves_alloc(AllocChain *data);
 #define aimoves_new() ((AIMoves*)achain_new(&aimoves_root, aimoves_alloc))
 //#define aimoves_free(m) achain_free((AllocChain*)(m))
@@ -325,7 +343,7 @@ void aimoves_append(AIMoves *moves, const AIMove *aim);
 ///////////* Add an AIMove to an AIMoves array; existing moves weights will be
 //////////   overwritten */
 //////////
-int aimoves_choose(AIMoves *moves, AIMove *move);
+int aimoves_choose(AIMoves *moves, AIMove *move, unsigned int *index);
 /* Will choose one of the best moves from a GArray of AIMove structures at
    random. Returns non-zero if a move was chosen or zero if a move could not
    be chosen for some reason. */
@@ -400,6 +418,7 @@ extern AllocChain *aimoves_root;
 /*AIMoves **/ void enum_adjacent(Board *b, int dist,AIMoves *moves,unsigned int current_random);
 /* Enumerate empty tiles at most dist away from some other piece on the board */
 
+void streamsort(AIMoves *moves,unsigned int *index);
 /*AIMoves **/void ai_marks(Board *b, PIECE min,AIMoves *moves);
 /* Fills a moves list with tiles marked at least PIECE_THREAT(min) */
 
@@ -448,7 +467,14 @@ AIMoves *ai_priority(const Board *b);
 void my_srandom(int seed,unsigned int *current_random);
 int my_irand(int imax,unsigned int current_random);
 //void backup_move(Board *board, AIMoves *moves,AIMove *move);
-AIWEIGHT threat_line(int x, int y, int dx, int dy,Board *b,Board *bwrite,AIMoves *moves,int k);
-int threat_window(int x, int y, int dx, int dy,
-                         PIECE *ptype, int *pdouble,Board *b);
+//AIWEIGHT threat_line(int x, int y, int dx, int dy,Board *b,Board *bwrite,int k,int loop_bound);
+//int threat_window(int x, int y, int dx, int dy,
+//                         PIECE *ptype, int *pdouble,Board *b);
 int connect6ai_synth(int firstmove,char movein[8], char colour, char moveout[8]);
+//extern "C" AIMove pico_stream_input_queue();
+//extern "C" void pico_stream_output_queue(AIMove);
+//extern "C" AIMove pico_ips_fifo_read_queue();
+//extern "C" void pico_ips_fifo_write_queue(AIMove);
+//extern int id;
+//extern int ready; 
+#endif

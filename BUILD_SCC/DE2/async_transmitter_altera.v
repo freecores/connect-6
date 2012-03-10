@@ -3,8 +3,8 @@ input clk, TxD_start;
 input [7:0] TxD_data;
 output TxD, TxD_busy;
 
-parameter ClkFrequency = 50000000; // 50MHz
-//parameter ClkFrequency = 27000000; // 27MHz
+//parameter ClkFrequency = 50000000; // 50MHz
+parameter ClkFrequency = 27000000; // 27MHz
 parameter Baud = 115200;
 
 // Baud generator

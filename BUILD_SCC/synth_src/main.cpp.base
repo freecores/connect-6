@@ -23,8 +23,8 @@
 #include "util.h"
 #include "connect6.h"
 #include "connect6_synth.h"
-//#include "pico.h"
-//#include "shared.h"
+#include "pico.h"
+#include "shared.h"
 
 // The AI has as much time as it wants, but moves after 1 second. Default is to wait 2 seconds
 #define AI_WAIT_TIME 0.1
@@ -33,7 +33,7 @@
 #define MOVE_TIME_LIMIT 0.1
 
 using namespace std;
-
+extern "C" int main(int argc, char **argv);
 // commandline option: -port <serialport>
 int main(int argc, char **argv){
     //for verification two runs and a reference board
@@ -53,7 +53,7 @@ int main(int argc, char **argv){
     // Get software AI's colour
     char AI_colour = select_AI_colour(argc,argv);
     char FPGA_colour;
-	//int id = PICO_initialize_PPA(\TCAB_NAME);
+	int id = PICO_initialize_PPA(connect6ai_synth);
     // Take care of the first few moves (including sending the colour)
     if (AI_colour == 'D'){
         FPGA_colour = 'L';
@@ -219,6 +219,7 @@ int main(int argc, char **argv){
         connect6ai(board,AI_colour,move);
 	movecount++;
         cout<<"AI MOVE: "<<move[0]<<move[1]<<move[2]<<move[3]<<endl;
+	if(movecount >=20) return 0 ; //reducing length of simulation
         winning_colour = check_for_win(board);
         if (winning_colour == AI_colour){
             cout<<"AI has won! " << movecount << " moves " << "Exiting."<<endl;
@@ -269,7 +270,7 @@ int main(int argc, char **argv){
         print_board_file(board);
     }
 
-//PICO_finalize_PPA(id);
+PICO_finalize_PPA(id);
 
     return 0;
 

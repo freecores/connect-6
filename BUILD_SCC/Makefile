@@ -1,18 +1,19 @@
-GCC=g++
-
+GCC=g++ -g -DPICO_SYNTH -I/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/simu/include -I./synth_src
+GCC_LINK= g++ -L/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/simu/src/SimCode/ -lpdextn -lnosimdump -lsimerror -L/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/edgcpfe/lib/ -lpthread -lm -lstdc++ -lC
 SCC=schroot -c centos5-i386 ~/bin/synphonycc_fpga
 SCC_SCRIPTS=./scc_scripts
 SYNTH_SRC=./synth_src
 
 
 
-
+GCC_LINK=g++ /opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/simu/src/SimCode/golden.o  -L/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/simu/src/SimCode/ -lpdextn -lnosimdump -lsimerror -L/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/edgcpfe/lib/ -lpthread -lm -lstdc++ -lC
 
 all: fpt_connect6 test_golden
 
-fpt_connect6: ${SYNTH_SRC}/main.cpp util.o connect6.o connect6_synth.o state.o threats.o
-	${GCC} -o connect6 ${SYNTH_SRC}/main.cpp util.o connect6.o connect6_synth.o state.o threats.o  -lpthread -lm -g -pg
-
+fpt_connect6: main.o util.o connect6.o connect6_synth.o state.o threats.o q.o 
+	${GCC_LINK} -o connect6 main.o q.o util.o connect6.o connect6_synth.o state.o threats.o  -lpthread -lm -g -pg
+main.o:${SYNTH_SRC}/main.cpp
+	${GCC} -c -g -pg ${SYNTH_SRC}/main.cpp
 connect6_synth.o: ${SYNTH_SRC}/connect6_synth.cpp ${SYNTH_SRC}/connect6_synth.h
 	${GCC} -c -g -pg ${SYNTH_SRC}/connect6_synth.cpp
 connect6.o: ${SYNTH_SRC}/connect6.cpp ${SYNTH_SRC}/connect6.h
@@ -25,6 +26,8 @@ state.o:${SYNTH_SRC}/state.cpp ${SYNTH_SRC}/shared.h
 	
 threats.o:${SYNTH_SRC}/threats.cpp ${SYNTH_SRC}/shared.h
 	${GCC} -c -g -pg ${SYNTH_SRC}/threats.cpp
+q.o:${SYNTH_SRC}/q.cpp ${SYNTH_SRC}/shared.h
+	${GCC} -c -g -pg ${SYNTH_SRC}/q.cpp
 
 
 test_golden:
@@ -46,27 +49,32 @@ imp_window.tag:
 	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_window.tcl
 	echo "Done" > imp_window.tag
-imp_line.tag: imp_window.tag
-	#sed -s 's/\\TCAB_NAME/threat_line/g' main.cpp.base >main.cpp
-	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
+imp_line.tag: 
+	sed -s 's/\\TCAB_NAME/threat_line/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
+	#cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_line.tcl
 	echo "Done" > imp_line.tag
 imp_marks.tag:
-	#sed -s 's/\\TCAB_NAME/ai_mraks/g' main.cpp.base >main.cpp
-	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
+	sed -s 's/\\TCAB_NAME/ai_marks/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
+	#cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_marks.tcl
 	echo "Done" > imp_marks.tag
-imp_threat.tag: imp_line.tag imp_marks.tag
-	#sed -s 's/\\TCAB_NAME/ai_threats/g' main.cpp.base >main.cpp
-	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
+imp_sort.tag:
+	sed -s 's/\\TCAB_NAME/streamsort/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
+	#cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
+	${SCC} ${SCC_SCRIPTS}/run_imp_sort.tcl
+	echo "Done" > imp_sort.tag
+imp_threat.tag: imp_line.tag 
+	sed -s 's/\\TCAB_NAME/ai_threats/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
+	#cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_threat.tcl
 	echo "Done" > imp_threat.tag
 imp_adjacent.tag:
-	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
-	#sed -s 's/\\TCAB_NAME/ai_adjacent/g' main.cpp.base >main.cpp
+	#cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
+	sed -s 's/\\TCAB_NAME/ai_adjacent/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_adjacent.tcl
 	echo "Done" > imp_adjacent.tag
-imp_connect.tag: imp_threat.tag  imp_adjacent.tag
+imp_connect.tag: imp_threat.tag imp_adjacent.tag
 	sed -s 's/\\TCAB_NAME/connect6ai_synth/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_connect.tcl
 	echo "Done" > imp_connect.tag

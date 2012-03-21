@@ -20,6 +20,20 @@ end entity AI;
 
 
 architecture c_to_g of AI is
+component bram_based_stream_buffer is
+--#(.width(48), .depth(`CONNECT6AI_SYNTH_ILS_FIFO_QUEUE_DISMANTLE_LENGTH))  
+		port(
+                      clk:in std_logic;
+                      reset:in std_logic;
+                      store_ready:in std_logic;
+                      flush:in std_logic;
+                      store_req:out std_logic;
+                      load_req:out std_logic;
+                      load_ready:in std_logic;
+                      indata:in std_logic_vector(47 downto 0);
+                      outdata:out std_logic_vector(47 downto 0)
+);
+end component bram_based_stream_buffer;
 
 component connect6ai_synth_tcab is
 	port(
@@ -62,13 +76,25 @@ component connect6ai_synth_tcab is
         rawdataout_pico_connect6ai_synth_moveout_out_4_0: out std_logic_vector(7 downto 0);
         rawdataout_pico_connect6ai_synth_moveout_out_5_0: out std_logic_vector(7 downto 0);
         rawdataout_pico_connect6ai_synth_moveout_out_6_0: out std_logic_vector(7 downto 0);
-        rawdataout_pico_connect6ai_synth_moveout_out_7_0: out std_logic_vector(7 downto 0)
+        rawdataout_pico_connect6ai_synth_moveout_out_7_0: out std_logic_vector(7 downto 0);
+        instream_queue_di_0:in std_logic_vector(47 downto 0);
+        instream_queue_req_0:out std_logic;
+        instream_queue_ready_0:in std_logic;
+        outstream_queue_do_1:out std_logic_vector(47 downto 0);
+        outstream_queue_req_1:out std_logic;
+        outstream_queue_ready_1:in std_logic
 
 	);
 end component connect6ai_synth_tcab;
 signal out_enables:std_logic_vector(7 downto 0);
 signal out_enables_reg:std_logic_vector(7 downto 0);
 signal AI_DATA,mAI_DATA: std_logic_vector(63 downto 0);
+signal ils_fifo_queue_dismantle_outdata:std_logic_vector(47 downto 0);
+signal tcab_instream_queue_req_0:std_logic;
+signal ils_fifo_queue_dismantle_store_req: std_logic;
+signal tcab_outstream_queue_do_1:std_logic_vector(47 downto 0);
+signal tcab_outstream_queue_req_1:std_logic;
+signal ils_fifo_queue_dismantle_load_req: std_logic;
 begin
 oAI_DATA<=AI_DATA;
 inst_ai:connect6ai_synth_tcab
@@ -113,8 +139,26 @@ inst_ai:connect6ai_synth_tcab
         rawdataout_pico_connect6ai_synth_moveout_out_4_0=> mAI_DATA(31 downto 24),
         rawdataout_pico_connect6ai_synth_moveout_out_5_0=> mAI_DATA(23 downto 16),
         rawdataout_pico_connect6ai_synth_moveout_out_6_0=> mAI_DATA(15 downto 8),
-        rawdataout_pico_connect6ai_synth_moveout_out_7_0=> mAI_DATA(7 downto 0)
+        rawdataout_pico_connect6ai_synth_moveout_out_7_0=> mAI_DATA(7 downto 0),
+        instream_queue_di_0=>ils_fifo_queue_dismantle_outdata(47 downto 0),
+        instream_queue_req_0=>tcab_instream_queue_req_0,
+        instream_queue_ready_0=>ils_fifo_queue_dismantle_store_req,
+        outstream_queue_do_1=>tcab_outstream_queue_do_1(47 downto 0),
+        outstream_queue_req_1=>tcab_outstream_queue_req_1,
+        outstream_queue_ready_1=>ils_fifo_queue_dismantle_load_req
 	);
+  ils_fifo_queue_dismantle:bram_based_stream_buffer 
+--#(.width(48), .depth(`CONNECT6AI_SYNTH_ILS_FIFO_QUEUE_DISMANTLE_LENGTH))  
+		port map(
+                      clk=>iCLK,
+                      reset=>not(iRST_n),
+                      store_ready=>tcab_instream_queue_req_0,
+                      flush=>'0',
+                      store_req=>ils_fifo_queue_dismantle_store_req,
+                      load_req=>ils_fifo_queue_dismantle_load_req,
+                      load_ready=>tcab_outstream_queue_req_1,
+                      indata=>tcab_outstream_queue_do_1(47 downto 0),
+                      outdata=>ils_fifo_queue_dismantle_outdata(47 downto 0));
 
 process(iCLK)
 begin

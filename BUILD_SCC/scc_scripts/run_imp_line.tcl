@@ -12,13 +12,15 @@ set_implementation_params -systemc_source no
 set_implementation_params -memory_return_path_external_delay 0%
 set_implementation_params -memory_forward_path_external_delay 0%
 set_implementation_params -instream_forward_path_external_delay 0%
+set_implementation_params -import_tcab "imp_window"
 set_implementation_params -sccompiler_args "-DDONT_VERIFY_PPAID -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g"
 set_implementation_params -outstream_return_path_external_delay 0%
 set_implementation_params -appfiles "synth_src/state.cpp synth_src/threats.cpp"
 set_implementation_params -proc threat_line
 set_implementation_params -memory_forward_boundary_register infer
 set_implementation_params -cppcompiler_args "-g -DPICO_SYNTH -fpermissive"
-set_implementation_params -task_ii 441
+#set_implementation_params -task_ii 441
+set_loop_params -ii 1
 set_implementation_params -techlib altera-cyclone3
 set_implementation_params -device ep3c25-ea144-7
 set_implementation_params -init_data_registers yes
@@ -31,7 +33,7 @@ set_implementation_params -reset_data_registers yes
 set_implementation_params -task_overlap 0
 set_implementation_params -instream_return_path_external_delay 0%
 set_implementation_params -simulator modelsim
-set_implementation_params -clock_freq 100
+set_implementation_params -clock_freq 50
 
 
 setvar preprocess_auxopts "-L"

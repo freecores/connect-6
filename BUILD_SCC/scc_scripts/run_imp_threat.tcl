@@ -13,7 +13,7 @@ set_implementation_params -systemc_source no
 set_implementation_params -memory_return_path_external_delay 0%
 set_implementation_params -memory_forward_path_external_delay 0%
 #set_implementation_params -instream_forward_path_external_delay 0%
-set_implementation_params -import_tcab "imp_line "
+set_implementation_params -import_tcab "imp_line"
 set_implementation_params -sccompiler_args "-DDONT_VERIFY_PPAID -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g -g"
 #set_implementation_params -outstream_return_path_external_delay 0%
 set_implementation_params -appfiles "synth_src/state.cpp synth_src/threats.cpp"
@@ -34,7 +34,7 @@ set_implementation_params -reset_data_registers yes
 set_implementation_params -task_overlap 0
 #set_implementation_params -instream_return_path_external_delay 0%
 set_implementation_params -simulator modelsim
-set_implementation_params -clock_freq 100
+set_implementation_params -clock_freq 50
 set_implementation_params -allow_latency_violation no
 
 

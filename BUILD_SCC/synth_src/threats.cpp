@@ -192,8 +192,8 @@ int threat_window(int x, int y, int dx, int dy,
                 return 0;
 
         /* Push forward the maximum and find the window type */
-	//#pragma unroll
-	//#pragma num_iterations(1,3,6)
+	#pragma unroll 
+	#pragma num_iterations(1,3,6)
         for (maximum = 1; maximum < connect_k; maximum++) {
                 p = piece_at(b, x + dx * maximum, y + dy * maximum);
                 if (p == PIECE_ERROR)
@@ -209,8 +209,8 @@ int threat_window(int x, int y, int dx, int dy,
         maximum--;
 
         /* Try to push the entire window back */
-	//#pragma unroll
-	//#pragma num_iterations(1,3,6)
+	#pragma unroll 
+	#pragma num_iterations(1,3,6)
         for (minimum = -1; minimum > -connect_k; minimum--) {
                 p = piece_at(b, x + dx * minimum, y + dy * minimum);
                 if (p == PIECE_ERROR || piece_empty(p))
@@ -232,8 +232,8 @@ int threat_window(int x, int y, int dx, int dy,
         /* Push back minimum if we haven't formed a complete window, this window
            can't be a double */
         if (maximum - minimum < connect_k - 1) {
-	//#pragma unroll
-	//#pragma num_iterations(1,3,6)
+	//#pragma unroll 
+	#pragma num_iterations(1,3,6)
                 for (minimum--; minimum > maximum - connect_k; minimum--) {
                         p = piece_at(b, x + dx * minimum, y + dy * minimum);
                         if (p == PIECE_ERROR)
@@ -276,7 +276,7 @@ int threat_window(int x, int y, int dx, int dy,
 	#pragma internal_fast threat_counts
 	//#pragma read_write_ports threat_counts.data combined 2
 	//#pragma no_memory_analysis threat_counts
-        if (k==1) board_copy(b, bwrite);
+        //if (k==1) board_copy(b, bwrite);
         int i;
         AIWEIGHT weight = 0;
         ///* Clear threat tallys */
@@ -367,7 +367,7 @@ FIFO(queue,AIMove);
 	/*static*/ Board bwrite;//={0,0,0,0,0,0,0,0,0,0,0,{{0}}} ;//= NULL;
 	//#pragma read_write_ports b.data combined 2
 	#pragma internal_blockram bwrite
-	//#pragma multi_buffer bwrite 2
+	//#pragma multi_buffer bwrite 22
 	//#pragma no_memory_analysis b
 	/*static*/ AIMoves moves;//={0,0,0,{{0,0,0}}};
 	//#pragma read_write_ports moves.data combined 3
@@ -515,6 +515,7 @@ FIFO(queue,AIMove);
 				}
 
 
+        			if (k==1) board_copy(&b, &bwrite);
                 		u_sum += threat_line(arg1, arg2, arg3, arg4,&b,&bwrite,k,loop_bound);
 			}
 	}
@@ -712,11 +713,11 @@ void streamsort(AIMoves *moves,unsigned int *index){
 //		}
 		//while(1) {
 		//int count=0;
-		#pragma num_iterations(1,150,1362)
-		for(k=0;k<1362;k++){
+		#pragma num_iterations(1,150,368)
+		for(k=0;k<368;k++){
 			//count++;
 			//cout<<count<<endl;
-			if (k>1000){
+			if (k>6){
 				
 			//if(ready>5){ 
 				val=pico_stream_input_queue();

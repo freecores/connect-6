@@ -72,7 +72,7 @@ SEG7_LUT_8 			u0	(	HEX0,HEX1,HEX2,HEX3,HEX4,HEX5,HEX6,HEX7,mSEG7_DIG );
 
 wire mTXD_Done_not;
 RS232_Controller 	u1_bis(		.iDATA(mTXD_DATA),.iTxD_Start(mTXD_Start),.oTxD_Busy(mTXD_Done_not),
-							.oDATA(mRXD_DATA),.oRxD_Ready(mRXD_Ready),.iCLK(OSC_27),.RST_n(KEY[0]),
+							.oDATA(mRXD_DATA),.oRxD_Ready(mRXD_Ready),.iCLK(OSC_100),.RST_n(KEY[0]),
 							.oTxD(UART_TXD),.iRxD(UART_RXD));
 assign mTXD_Done = !mTXD_Done_not;
 assign LED_RED[9] = mTXD_Done_not;
@@ -88,7 +88,7 @@ CMD_Decode			u5	(	//	USB JTAG
 							.iRXD_DATA(mRXD_DATA),.iRXD_Ready(mRXD_Ready),
 						 	.oTXD_DATA(mTXD_DATA),.oTXD_Start(mTXD_Start),.iTXD_Done(mTXD_Done),
 							//	Control
-						 	.iCLK(OSC_27),.iRST_n(KEY[0]), .oAI_RSTn(mAI_RSTn),
+						 	.iCLK(OSC_100),.iRST_n(KEY[0]), .oAI_RSTn(mAI_RSTn),
 							//AI
 							.oAI_DATA(DATA_to_AI),
 							.iAI_DATA(DATA_from_AI),
@@ -103,17 +103,19 @@ AI 			inst_AI (
 							.oAI_Done(mAI_Done),
 							
 							//	Control
-						 	.iCLK(OSC_27),.iRST_n(mAI_RSTn)	);
+						 	.iCLK(OSC_100),.iRST_n(mAI_RSTn)	);
 wire [63:0] CMD_Tmp;					
 
 //assign	mSEG7_DIG	=	{	CMD_Tmp[31:28],CMD_Tmp[27:24],CMD_Tmp[23:20],CMD_Tmp[19:16],
 //							CMD_Tmp[15:12],CMD_Tmp[11:8],CMD_Tmp[7:4],CMD_Tmp[3:0]	};
 assign	mSEG7_DIG	=	{	
-							DATA_to_AI[63:60],DATA_to_AI[59:56],DATA_to_AI[55:52],DATA_to_AI[51:48],
-							DATA_to_AI[47:44],DATA_to_AI[43:40],DATA_to_AI[39:36],DATA_to_AI[35:32]	}
-//							DATA_from_AI[31:28],DATA_from_AI[27:24],DATA_from_AI[23:20],DATA_from_AI[19:16],
-//							DATA_from_AI[15:12],DATA_from_AI[11:8],DATA_from_AI[7:4],DATA_from_AI[3:0]	}
+//							DATA_to_AI[63:60],DATA_to_AI[59:56],DATA_to_AI[55:52],DATA_to_AI[51:48],
+//							DATA_to_AI[47:44],DATA_to_AI[43:40],DATA_to_AI[39:36],DATA_to_AI[35:32]	}
+							DATA_from_AI[31:28],DATA_from_AI[27:24],DATA_from_AI[23:20],DATA_from_AI[19:16],
+							DATA_from_AI[15:12],DATA_from_AI[11:8],DATA_from_AI[7:4],DATA_from_AI[3:0]	}
 				;
-							
-							
+wire rst=!(KEY[0]);
+wire OSC_100,lock;
+assign LED_GREEN[7] = lock;
+pll inst_pll(.areset(rst),.inclk0(OSC_50),.c0(OSC_100),.locked(lock));			
 endmodule

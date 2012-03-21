@@ -27,7 +27,7 @@ set_implementation_params -outstream_forward_path_external_delay 0%
 set_implementation_params -build_tcab yes
 set_implementation_params -reset_data_registers yes
 set_implementation_params -instream_return_path_external_delay 0%
-set_implementation_params -clock_freq 100
+set_implementation_params -clock_freq 50
 set_implementation_params -allow_latency_violation no
 #set_implementation_params -user_supplied_fpga_memory_read_write_ports separate
 #set_implementation_params -internal_blockram_memory_read_write_ports separate

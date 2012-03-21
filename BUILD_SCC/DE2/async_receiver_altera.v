@@ -3,8 +3,9 @@ input clk, RxD;
 output RxD_data_ready;  // onc clock pulse when RxD_data is valid
 output [7:0] RxD_data;
 
-//parameter ClkFrequency = 50000000; // 50MHz
-parameter ClkFrequency = 27000000; // 27MHz
+//parameter ClkFrequency = 62500000; // 50MHz
+parameter ClkFrequency = 50000000; // 50MHz
+//parameter ClkFrequency = 27000000; // 27MHz
 parameter Baud = 115200;
 
 // We also detect if a gap occurs in the received stream of characters

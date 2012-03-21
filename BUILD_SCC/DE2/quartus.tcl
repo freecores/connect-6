@@ -36,7 +36,7 @@ foreach rtl ${rtlfiles} {
   }
   set_global_assignment -name VERILOG_FILE "../../../rtl/${rtl}"
 }
-
+#set_global_assignment -name VERILOG_FILE ../../../../rtl_package/simu_stubs/vsim/bram_based_stream_buffer.v
 #DE2 files
 set de2files [glob -directory  ../../../../DE2/ -nocomplain -tails -types f -- {*\.v}]
 foreach mcs ${de2files} {
@@ -52,6 +52,11 @@ foreach mcs ${de2files} {
 }
   set_global_assignment -name VHDL_FILE "../../../../DE2/${mcs}"
 }
+set_global_assignment -name VHDL_FILE "../../../../DE2/pll/pll.vhd"
+set_global_assignment -name MISC_FILE "../../../../DE2/pll/pll_inst.vhd"
+set_global_assignment -name MISC_FILE "../../../../DE2/pll/pll.cmp"
+set_global_assignment -name MISC_FILE "../../../../DE2/pll/pll.ppf"
+set_global_assignment -name MISC_FILE "../../../../DE2/pll/pll_syn.v"
 
 # run the flow   
 #execute_flow -compile

@@ -49,7 +49,7 @@ imp_window.tag:
 	cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_window.tcl
 	echo "Done" > imp_window.tag
-imp_line.tag: 
+imp_line.tag: imp_window.tag
 	sed -s 's/\\TCAB_NAME/threat_line/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
 	#cp ${SYNTH_SRC}/main.cpp.base ${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_line.tcl

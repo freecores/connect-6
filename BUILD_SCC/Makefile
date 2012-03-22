@@ -8,10 +8,12 @@ SYNTH_SRC=./synth_src
 
 GCC_LINK=g++ /opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/simu/src/SimCode/golden.o  -L/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/simu/src/SimCode/ -lpdextn -lnosimdump -lsimerror -L/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/edgcpfe/lib/ -lpthread -lm -lstdc++ -lC
 
+GCC_LINK_ARGS=-L/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/simu/src/SimCode/ -lpdextn -lnosimdump -lsimerror -L/opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/edgcpfe/lib/ -lpthread -lm -lstdc++ -lC
+
 all: fpt_connect6 test_golden
 
-fpt_connect6: main.o util.o connect6.o connect6_synth.o state.o threats.o q.o 
-	${GCC_LINK} -o connect6 main.o q.o util.o connect6.o connect6_synth.o state.o threats.o  -lpthread -lm -g -pg
+fpt_connect6: main.o util.o connect6.o connect6_synth.o state.o threats.o search.o
+	${GCC} -o connect6 /opt/synopsys/scc/synphonycc-fpga-vE-2010.12-SP1/pico/simu/src/SimCode/golden.o main.o  util.o connect6.o connect6_synth.o state.o threats.o search.o  ${GCC_LINK_ARGS} -lpthread -lm -g -pg 
 main.o:${SYNTH_SRC}/main.cpp
 	${GCC} -c -g -pg ${SYNTH_SRC}/main.cpp
 connect6_synth.o: ${SYNTH_SRC}/connect6_synth.cpp ${SYNTH_SRC}/connect6_synth.h
@@ -24,6 +26,8 @@ util.o: ${SYNTH_SRC}/util.cpp ${SYNTH_SRC}/util.h
 state.o:${SYNTH_SRC}/state.cpp ${SYNTH_SRC}/shared.h
 	${GCC} -c -g -pg ${SYNTH_SRC}/state.cpp
 	
+search.o:${SYNTH_SRC}/search.cpp ${SYNTH_SRC}/shared.h
+	${GCC} -c -g -pg ${SYNTH_SRC}/search.cpp
 threats.o:${SYNTH_SRC}/threats.cpp ${SYNTH_SRC}/shared.h
 	${GCC} -c -g -pg ${SYNTH_SRC}/threats.cpp
 q.o:${SYNTH_SRC}/q.cpp ${SYNTH_SRC}/shared.h

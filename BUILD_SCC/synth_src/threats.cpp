@@ -348,7 +348,7 @@ FIFO(queue,AIMove);
 #pragma fifo_length pico_stream_output_queue 800
 #pragma bandwidth pico_stream_input_queue 1
 #pragma bandwidth pico_stream_output_queue 1
-/*AIMoves*/int ai_threats(Board *board,AIMove *move)
+/*AIMoves*/int ai_threats(Board *board,AIMoves *moves,unsigned int *index)
 {
 	//#pragma read_write_ports board.data combined 2
 	//#pragma internal_blockram board
@@ -369,12 +369,12 @@ FIFO(queue,AIMove);
 	#pragma internal_blockram bwrite
 	//#pragma multi_buffer bwrite 22
 	//#pragma no_memory_analysis b
-	/*static*/ AIMoves moves;//={0,0,0,{{0,0,0}}};
+	///*static*/ AIMoves moves;//={0,0,0,{{0,0,0}}};
 	//#pragma read_write_ports moves.data combined 3
 	#pragma internal_blockram moves
 	//#pragma no_memory_analysis moves
 
-	moves.len=0;
+	moves->len=0;
         //AIMoves moves;
         AIWEIGHT u_sum = 0;
         int i;
@@ -523,27 +523,28 @@ FIFO(queue,AIMove);
 	//PICO_finalize_PPA(id);
 /*---------------------------------------------------------------------------*/
 	//board_copy(&b,&b_marks);
-		unsigned int index[max_size]={0};
+		//unsigned int index[max_size]={0};
 		#pragma bitsize index 9
 		#pragma internal_fast index
 	AIMoves moves1;
+	moves1.len=0;
 	#pragma internal_blockram moves1
-        /*moves = */ ai_marks(&bwrite, PIECE_THREAT(1),&moves);
+        /*moves = */ ai_marks(&bwrite, PIECE_THREAT(1),&moves1);
 	//test(ready);
-	streamsort(&moves1,&index[0]);
-        //moves1.utility = u_sum;
-        //moves.utility = u_sum;
+	streamsort(moves,index);
+        moves1.utility = u_sum;
+        moves->utility = u_sum;
 	/*----------------------------
 		rewritten for hardware
 	----------------------------*/
 	//if (!aimoves_choose(&moves1, move))
 	//	return 0;
 	//else return 1;		
-	int ret_val;
-	ret_val=aimoves_choose(&moves1, move,&index[0]);
-	if (!ret_val)
-		return 0;
-	else return 1;		
+	//int ret_val;
+	//ret_val=aimoves_choose(&moves1, move,&index[0]);
+	//if (!ret_val)
+	//	return 0;
+	//else return 1;		
 	/*----------------------------
 	end rewritten for hardware
 	----------------------------*/

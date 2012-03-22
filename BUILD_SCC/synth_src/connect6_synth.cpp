@@ -172,12 +172,15 @@ int connect6ai_synth(int firstmove,char movein[8], char colour, char moveout[8])
 
 	//#pragma num_iterations(1,2,2)
 	//#pragma unroll
+	Player player;
+	player.depth=1;
+	player.branch=1;
 	for(i=myboard.moves_left;i>0;i--){
         	  //aimoves_free(&moves);
 			move.x=-1;
 			move.y=-1;
 			
-                       	if (!ai_threats(&myboard,&move_threat)){ 
+                       	if (!search(&myboard,&move_threat,&player)){ 
                                 //aimoves_free(&moves);
 				//moves.len=0;
                                 ai_adjacent(&myboard,&move_adj,current_random);

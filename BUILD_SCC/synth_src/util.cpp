@@ -31,11 +31,11 @@ char select_AI_colour (int argc, char **argv){
     int i;
    // cout<<"Please enter referee AI's colour. L or D"<<endl;
    // cin >> ai_colour;
-   //     for(i=0;i<argc; i++){
-   //       if((strncmp(argv[i],"-player",7)==0) && (i< (argc+1)) ){
-   //                ai_colour= *argv[i+1];
-   //       }
-   //     }
+        for(i=0;i<argc; i++){
+          if((strncmp(argv[i],"-player",7)==0) && (i< (argc+1)) ){
+                   ai_colour= *argv[i+1];
+          }
+        }
 
    // while (ai_colour != 'L' && ai_colour != 'D'){
    //     cout<<"Invalid colour. Single character L or D"<<endl;

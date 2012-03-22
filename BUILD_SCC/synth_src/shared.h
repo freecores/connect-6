@@ -31,6 +31,7 @@ typedef unsigned int gboolean;
 #pragma bitsize gboolean 1
 typedef int gsize;
 //#endif
+#include <limits.h>
 #include "pico.h"
 
 
@@ -402,7 +403,7 @@ extern AllocChain *aimoves_root;
 ////////// *      AI helper functions
 ////////// */
 //////////
-//////////extern int ai_stop;
+extern int ai_stop;
 ///////////* If this variable is non-zero, the system is trying to stop the AI thread
 //////////   and your AI should exit. Do not set this yourself. */
 //////////
@@ -458,7 +459,7 @@ void streamsort(AIMoves *moves,unsigned int *index);
 ///////////AIMoves *ai_dfs_utility(const Board *b);
 ////////////* Utility function */
 ///////////
-/*AIMoves **/int ai_threats(Board *board,AIMove *move);
+/*AIMoves **/int ai_threats(Board *board,AIMoves *moves,unsigned int *index);
 AIMoves *ai_priority(const Board *b);
 /* Multi-level threats */
 
@@ -477,4 +478,10 @@ int connect6ai_synth(int firstmove,char movein[8], char colour, char moveout[8])
 //extern "C" void pico_ips_fifo_write_queue(AIMove);
 //extern int id;
 //extern int ready; 
+typedef struct {
+        PLAYER ai;
+        //SEARCH search;
+        int depth, branch, cache, tss;
+} Player;
+/*AIMoves **/int search(const Board *board,AIMove *move, Player *player);
 #endif

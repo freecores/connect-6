@@ -8,6 +8,8 @@ connectk -- UMN CSci 5512W project
 //#include "config.h"
 //#include <string.h>
 //#include <glib.h>
+//#include <iostream>
+#include <stdio.h>
 #include "./shared.h"
 #include "pico.h"
 //#include "../connectk.h"
@@ -36,6 +38,7 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
         /* Alpha-beta sanity check */
         if (alpha >= beta) {
                 //g_warning("DFS alpha-beta failed sanity check");
+			//printf("DFS alpha-beta failed sanity check\n");
                 return moves->utility;
         }
 
@@ -54,7 +57,7 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
 
         /* Search each move available in depth first order */
         for (i = 0; i < moves->len; i++) {
-                static Board b_next;
+                Board b_next;
                 AIMove *aim = moves->data + i;
                 AIMoves moves_next;
 
@@ -62,6 +65,7 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
                 if (!piece_empty(piece_at(b, aim->x, aim->y))) {
                         //g_warning("DFS utility function suggested a bad move "
                                   //"(%s)", bcoords_to_string(aim->x, aim->y));
+			//printf("bad move\n");
                         continue;
                 }
 
@@ -102,6 +106,7 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
                         //        return moves->utility;
                         //}
                         //moves_next = func(b_next);
+	printf("depth %d branch %d player %d moves_left %d alpha %d MOVE %d %d \n",depth,i,b_next.turn,b_next.moves_left,alpha,aim->y+1,aim->x+1);
 			ai_threats(&b_next,&moves_next,index);
 			
                         aim->weight = df_search(&b_next, &moves_next, index,player,

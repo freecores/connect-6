@@ -550,7 +550,7 @@ FIFO(queue,AIMove);
 	----------------------------*/
         //board_free(b);
         //return moves;
-	//return 0;
+	return 1;
 }
 
 //void debug_counts(void)
@@ -727,16 +727,16 @@ void streamsort(AIMoves *moves,unsigned int *index){
 				else if(val.weight==-100) continue;
 				#pragma num_iterations(0,150,361)
 				for(i=0;i<len;i++){
-					if (moves->data[index[i]].weight < val.weight){
+					if (moves->data[i].weight < val.weight){
 					for(j=len-1;j>i-1;j--){
-						//moves->data[j+1]=moves->data[j];
-						index[j+1]=index[j];
+						moves->data[j+1]=moves->data[j];
+						//index[j+1]=index[j];
 					}
 					break;
 					}
 				}
 					index[i]=len;
-					moves->data[len]=val;
+					moves->data[i]=val;
 					len++;
 				//cout<<"STREAMSORT"<<":";
 			//}

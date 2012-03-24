@@ -223,17 +223,17 @@ int aimoves_choose(AIMoves *moves, AIMove *move,unsigned int *index)
         int top;
 	AIMoves moves1;
 	#pragma bitsize i 4
-      //  if (!moves || !moves->len)
-      //          return 0;
-      //  //aimoves_sort(moves);
-      //  for (top = 0; top < moves->len &&
-      //       moves->data[top].weight == moves->data[0].weight; top++);
-      //  if (top)
-      //          //i = my_irand(top,current_random);//g_random_int_range(0, top);
-      //  	i=0;
-      //  
-      //  *move = moves->data[i];
-      //  return 1;
+        if (!moves || !moves->len)
+                return 0;
+        aimoves_sort(moves);
+        for (top = 0; top < moves->len &&
+             moves->data[top].weight == moves->data[0].weight; top++);
+        if (top)
+                //i = my_irand(top,current_random);//g_random_int_range(0, top);
+        	i=0;
+        
+        *move = moves->data[i];
+        return 1;
 	/*---------------------------------------
 		Rewritten for Hardware
 	---------------------------------------*/
@@ -253,7 +253,7 @@ int aimoves_choose(AIMoves *moves, AIMove *move,unsigned int *index)
 	//}
         //                return 0;
 	if(!moves|| !moves->len) return 0;
-	else {*move=moves->data[index[i]];return 1;}
+	else {*move=moves->data[i];return 1;}
 
 
 }

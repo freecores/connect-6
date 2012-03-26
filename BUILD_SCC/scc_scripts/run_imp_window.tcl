@@ -1,6 +1,6 @@
 set_project_params -directory ./
 set_project_params -results myboard.txt
-set_project_params -sources "synth_src/connect6.cpp synth_src/connect6_synth.cpp synth_src/main.cpp synth_src/q.cpp synth_src/state.cpp synth_src/threats.cpp synth_src/util.cpp"
+set_project_params -sources "synth_src/connect6.cpp synth_src/connect6_synth.cpp synth_src/main.cpp synth_src/q.cpp synth_src/state.cpp synth_src/threats.cpp synth_src/util.cpp synth_src/search_bfs.cpp"
 set_project_params -headers "synth_src/connect6.h synth_src/connect6_synth.h synth_src/q.hpp synth_src/shared.h synth_src/threats.h synth_src/util.h"
 set_project_params -cache_result_files no
 set_project_params -cache_data_files yes

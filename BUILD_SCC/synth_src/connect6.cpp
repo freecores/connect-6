@@ -206,7 +206,7 @@ int connect6ai(char board[][19], char colour, char move[4]){
                 highx = x;
                 highy = y;
                 currenthigh = temp;
-                highRandom = 1;//rand();
+                highRandom =1;// rand();
             }
             // If a tie happens, pseudo-randomly choose one between them
             if (temp == currenthigh && temp != 0){

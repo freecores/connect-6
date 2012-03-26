@@ -27,7 +27,7 @@ state.o:${SYNTH_SRC}/state.cpp ${SYNTH_SRC}/shared.h
 	${GCC} -c -g -pg ${SYNTH_SRC}/state.cpp
 	
 search.o:${SYNTH_SRC}/search.cpp ${SYNTH_SRC}/shared.h
-	${GCC} -c -g -pg ${SYNTH_SRC}/search.cpp
+	${GCC} -c -g -pg ${SYNTH_SRC}/search_bfs.cpp -o search.o
 threats.o:${SYNTH_SRC}/threats.cpp ${SYNTH_SRC}/shared.h
 	${GCC} -c -g -pg ${SYNTH_SRC}/threats.cpp
 q.o:${SYNTH_SRC}/q.cpp ${SYNTH_SRC}/shared.h
@@ -78,7 +78,11 @@ imp_adjacent.tag:
 	sed -s 's/\\TCAB_NAME/ai_adjacent/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_adjacent.tcl
 	echo "Done" > imp_adjacent.tag
-imp_connect.tag: imp_threat.tag imp_adjacent.tag
+imp_search.tag: imp_threat.tag 
+	sed -s 's/\\TCAB_NAME/search/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
+	${SCC} ${SCC_SCRIPTS}/run_imp_search.tcl
+	echo "Done" > imp_search.tag
+imp_connect.tag: imp_search.tag imp_adjacent.tag
 	sed -s 's/\\TCAB_NAME/connect6ai_synth/g' ${SYNTH_SRC}/main.cpp.base >${SYNTH_SRC}/main.cpp
 	${SCC} ${SCC_SCRIPTS}/run_imp_connect.tcl
 	echo "Done" > imp_connect.tag

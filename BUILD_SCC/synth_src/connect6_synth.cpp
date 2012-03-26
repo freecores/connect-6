@@ -173,7 +173,7 @@ int connect6ai_synth(int firstmove,char movein[8], char colour, char moveout[8])
 	//#pragma num_iterations(1,2,2)
 	//#pragma unroll
 	Player player;
-	player.depth=3;
+	player.depth=4;
 	player.branch=2;
 	for(i=myboard.moves_left;i>0;i--){
         	  //aimoves_free(&moves);

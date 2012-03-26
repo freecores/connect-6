@@ -252,8 +252,8 @@ int aimoves_choose(AIMoves *moves, AIMove *move,unsigned int *index)
 	//	}
 	//}
         //                return 0;
-	if(!moves|| !moves->len) return 0;
-	else {*move=moves->data[i];return 1;}
+	//if(!moves|| !moves->len) return 0;
+	//else {*move=moves->data[i];return 1;}
 
 
 }
@@ -598,6 +598,7 @@ int count_pieces(const Board *b, BCOORD x, BCOORD y, PIECE type, int dx, int dy,
                 x += dx;
                 y += dy;
         }
+	/* this two lines create problem in synthesis  preprocess ?? */
         if (out)
                 *out = p;
         return i;
@@ -608,22 +609,23 @@ gboolean check_win_full(const Board *b, BCOORD x, BCOORD y,
 {
         int i, c1, c2, xs[] = {1, 1, 0, -1}, ys[] = {0, 1, 1, 1};
         PIECE type;
+	PIECE p;
 
         type = piece_at(b, x, y);
         if (type != PIECE_BLACK && type != PIECE_WHITE)
                 return FALSE;
         for (i = 0; i < 4; i++) {
-                c1 = count_pieces(b, x, y, type, xs[i], ys[i], 0);
-                c2 = count_pieces(b, x, y, type, -xs[i], -ys[i], 0);
+                c1 = count_pieces(b, x, y, type, xs[i], ys[i], &p);
+                c2 = count_pieces(b, x, y, type, -xs[i], -ys[i], &p);
                 if (c1 + c2 > connect_k) {
-                        if (x1)
-                                *x1 = x + xs[i] * (c1 - 1);
-                        if (y1)
-                                *y1 = y + ys[i] * (c1 - 1);
-                        if (x2)
-                                *x2 = x - xs[i] * (c2 - 1);
-                        if (y2)
-                                *y2 = y - ys[i] * (c2 - 1);
+                        //if (x1)
+                        //        *x1 = x + xs[i] * (c1 - 1);
+                        //if (y1)
+                        //        *y1 = y + ys[i] * (c1 - 1);
+                        //if (x2)
+                        //        *x2 = x - xs[i] * (c2 - 1);
+                        //if (y2)
+                        //        *y2 = y - ys[i] * (c2 - 1);
                         return TRUE;
                 }
         }

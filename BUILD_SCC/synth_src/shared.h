@@ -281,7 +281,7 @@ static inline void place_piece_type(Board *b, BCOORD x, BCOORD y, PIECE type)
 
 typedef int AIWEIGHT;
 /* Type for AI move weights (utilities) */
-#pragma bitsize AIWEIGHT 64
+#pragma bitsize AIWEIGHT 32
 
 typedef struct {
         AIWEIGHT weight;

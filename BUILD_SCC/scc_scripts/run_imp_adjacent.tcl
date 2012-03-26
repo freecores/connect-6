@@ -1,7 +1,7 @@
 set SYNTH_SRC "synth_src"
 set_project_params -directory ./
 set_project_params -results myboard.txt
-set_project_params -sources "${SYNTH_SRC}/connect6.cpp ${SYNTH_SRC}/connect6_synth.cpp ${SYNTH_SRC}/main.cpp ${SYNTH_SRC}/q.cpp ${SYNTH_SRC}/state.cpp ${SYNTH_SRC}/threats.cpp ${SYNTH_SRC}/util.cpp"
+set_project_params -sources "${SYNTH_SRC}/connect6.cpp ${SYNTH_SRC}/connect6_synth.cpp ${SYNTH_SRC}/main.cpp ${SYNTH_SRC}/q.cpp ${SYNTH_SRC}/state.cpp ${SYNTH_SRC}/threats.cpp ${SYNTH_SRC}/util.cpp ${SYNTH_SRC}/search_bfs.cpp"
 set_project_params -headers "${SYNTH_SRC}/connect6.h ${SYNTH_SRC}/connect6_synth.h ${SYNTH_SRC}/q.hpp ${SYNTH_SRC}/shared.h ${SYNTH_SRC}/threats.h ${SYNTH_SRC}/util.h"
 
 if [file exists imp_adjacent] { delete_implementation imp_adjacent }

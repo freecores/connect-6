@@ -356,6 +356,8 @@ FIFO(queue,AIMove);
 
 	//#pragma internal_blockram move
 	//#pragma no_memory_analysis move
+		#pragma bitsize index 9
+		#pragma internal_fast index
 	
 	/////////* All threat functions work on this board */
 	/*static*/ Board b;//={0,0,0,0,0,0,0,0,0,0,0,{{0}}} ;//= NULL;
@@ -371,7 +373,7 @@ FIFO(queue,AIMove);
 	//#pragma no_memory_analysis b
 	///*static*/ AIMoves moves;//={0,0,0,{{0,0,0}}};
 	//#pragma read_write_ports moves.data combined 3
-	#pragma internal_blockram moves
+	//#pragma internal_blockram moves
 	//#pragma no_memory_analysis moves
 
 	moves->len=0;
@@ -524,8 +526,8 @@ FIFO(queue,AIMove);
 /*---------------------------------------------------------------------------*/
 	//board_copy(&b,&b_marks);
 		//unsigned int index[max_size]={0};
-		#pragma bitsize index 9
-		#pragma internal_fast index
+		//#pragma bitsize index 9
+		//#pragma internal_fast index
 	AIMoves moves1;
 	moves1.len=0;
 	#pragma internal_blockram moves1
@@ -639,7 +641,7 @@ FIFO(queue,AIMove);
 /*AIMoves*/ void ai_marks(Board *b, PIECE minimum,AIMoves *moves)
 {
 	//#pragma read_write_ports b.data combined 2
-	#pragma internal_blockram b
+	//#pragma internal_blockram b
 	//#pragma no_memory_analysis b
         //AIMoves *moves = aimoves_new();
 	//AIMoves moves;
@@ -690,8 +692,8 @@ void streamsort(AIMoves *moves,unsigned int *index){
 		AIMove val;
 		AIMove data[361]={{-1},{-1},{-1}};
 		//unsigned int index[361];
-		#pragma bitsize index 9
-		#pragma internal_fast index
+		//#pragma bitsize index 9
+		//#pragma internal_fast index
 		int i,j,k;
 		unsigned int len=0;
 		moves->data[0].weight=-100;

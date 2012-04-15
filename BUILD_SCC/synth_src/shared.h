@@ -144,7 +144,7 @@ enum {
         /* These threat markers are usable by the AIs */
 };
 typedef int PIECE;
-//#pragma bitsize PIECE 16
+#pragma bitsize PIECE 32
 
 #define MAX_THREAT (INT_MAX - PIECE_THREAT0)
 /* Highest value a threat marker can have */
@@ -189,6 +189,10 @@ typedef struct Board {
 } Board;
 /* The board structure represents the state of the game board. Do NOT preserve
    board pointers across games. */
+typedef struct{
+	unsigned int data[361];
+		#pragma bitsize data 9
+} index_array;
 
 extern AllocChain *board_root;
 extern gsize board_mem;
@@ -344,7 +348,7 @@ void aimoves_append(AIMoves *moves, const AIMove *aim);
 ///////////* Add an AIMove to an AIMoves array; existing moves weights will be
 //////////   overwritten */
 //////////
-int aimoves_choose(AIMoves *moves, AIMove *move, unsigned int *index);
+int aimoves_choose(AIMoves *moves, AIMove *move, index_array *index);
 /* Will choose one of the best moves from a GArray of AIMove structures at
    random. Returns non-zero if a move was chosen or zero if a move could not
    be chosen for some reason. */
@@ -419,7 +423,7 @@ extern int ai_stop;
 /*AIMoves **/ void enum_adjacent(Board *b, int dist,AIMoves *moves,unsigned int current_random);
 /* Enumerate empty tiles at most dist away from some other piece on the board */
 
-void streamsort(AIMoves *moves,unsigned int *index);
+void streamsort(AIMoves *moves,index_array *index);
 /*AIMoves **/void ai_marks(Board *b, PIECE min,AIMoves *moves);
 /* Fills a moves list with tiles marked at least PIECE_THREAT(min) */
 
@@ -459,7 +463,7 @@ void streamsort(AIMoves *moves,unsigned int *index);
 ///////////AIMoves *ai_dfs_utility(const Board *b);
 ////////////* Utility function */
 ///////////
-/*AIMoves **/int ai_threats(Board *board,AIMoves *moves,unsigned int *index);
+/*AIMoves **/int ai_threats(Board board[5][16],int depth,int branch,AIMoves moves[5][16],index_array *index);
 AIMoves *ai_priority(const Board *b);
 /* Multi-level threats */
 
@@ -483,5 +487,5 @@ typedef struct {
         //SEARCH search;
         int depth, branch, cache, tss;
 } Player;
-/*AIMoves **/int search(const Board *board,AIMove *move, Player *player);
+/*AIMoves **/int search(Board *board,AIMove *move, Player *player);
 #endif

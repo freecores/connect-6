@@ -30,23 +30,24 @@ int mini(int x,int y){
 int maxi(int x,int y){
 	return (x>=y)?x:y;
 }
-static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *player,
+static AIWEIGHT df_search(Board *b, AIMoves *moves,index_array *index, Player *player,
                           int depth, int cache_index,
                           PIECE searched, AIWEIGHT alpha, AIWEIGHT beta)
 /* Depth is in _moves_ */
 {
-		#pragma bitsize index 9
-		#pragma internal_fast index
-	unsigned int index1[361]={0};
-		#pragma bitsize index 9
 		#pragma internal_fast index
         int i, j;
+	#pragma bitsize i 16
+	#pragma bitsize j 16
         Board b_next[5][16];
 	#pragma internal_blockram b_next
         AIMoves moves_next[5][16];
 	#pragma internal_fast moves_next
+	AIWEIGHT utility[5][16];
 	int branch=player->branch;
 
+        board_copy(b, &b_next[0][0]);
+	ai_threats(b_next,0,0,moves_next,index);
 
 
         ///* Search only the top moves beyond the minimum */
@@ -60,18 +61,11 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
         //}
 
         /* No moves left -- its a draw */
-	for(i=0;i<branch;i++){
-	moves_next[0][0].data[i].x=moves->data[i].x;
-	moves_next[0][0].data[i].y=moves->data[i].y;
-	moves_next[0][0].data[i].weight=moves->data[i].weight;
-	}
-	moves_next[0][0].utility=moves->utility;
-	moves_next[0][0].len=branch;
 	
-        if (moves->len < 1)                //"(%s)", bcoords_to_string(aim->x, aim->y));
+        if (moves_next[0][0].len < 1)                //"(%s)", bcoords_to_string(aim->x, aim->y));
 
                 return AIW_DRAW;
-                board_copy(b, &b_next[0][0]);
+                //board_copy(b, &b_next[0][0]);
 
         /* Search each move available in depth first order */
 	for(j=0;j<depth;j++){
@@ -80,17 +74,22 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
 		//int branches=(player->branch)^j;
 		//printf("branches %d\n",branches);
         for (i = 0; i < branches; i++) {
-                AIMove *aim = moves_next[j][i>>1].data + (i % branch);
+		//if(!(moves_next[j][i>>1].utility==AIW_WIN || moves_next[j][i>>1].utility==-AIW_WIN)){
+		if(!(utility[j][i>>1]==AIW_WIN || utility[j][i>>1]==-AIW_WIN)){
+                AIMove aim = *(moves_next[j][i>>1].data + (i % branch));
+		//printf ("aim->utility %d \n",moves_next[j][i>>1].utility);
 		
                 board_copy(&b_next[j][i>>1], &b_next[j+1][i]);
+		//if(moves_next[j][i/2].len<branch) printf ("caca");
+		//printf("%d %d\n",aim.x,aim.y);
 
                 /* Did we get a bad move? */
-                //if (!piece_empty(piece_at(&b_next[j+1][i], aim->x, aim->y))) {
-                //        //g_warning("DFS utility function suggested a bad move "
-                //                  //"(%s)", bcoords_to_string(aim->x, aim->y));
-		//	//printf("bad move\n");
-                //        continue;
-                //}
+                if (!piece_empty(piece_at(&b_next[j+1][i], aim.x, aim.y))) {
+                        //g_warning("DFS utility function suggested a bad move "
+                                  //"(%s)", bcoords_to_string(aim->x, aim->y));
+			//printf("bad move\n");
+                        continue;
+                }
 
                 /* Already searched here? */
                 ///////////////////////////if (piece_at(&b_next[j+1][i], aim->x, aim->y) == searched){
@@ -100,7 +99,7 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
                 ///////////////////////////place_piece_type(&b_next[j+1][i], aim->x, aim->y, searched);
 
                 //b_next = board_new();
-                place_piece(&b_next[j+1][i], aim->x, aim->y);
+                place_piece(&b_next[j+1][i], aim.x, aim.y);
                         AIWEIGHT next_alpha = alpha, next_beta = beta;
                         //AIFunc func;
 
@@ -117,12 +116,15 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
 
                 /* Did we win? */
 		
-                if (check_win_full(&b_next[j+1][i], aim->x, aim->y,0,0,0,0)){
-                        aim->weight = AIW_WIN;
+                if (check_win_full(&b_next[j+1][i], aim.x, aim.y,0,0,0,0)){
+                        aim.weight = AIW_WIN;
 	        	moves_next[j+1][i].utility=AIW_WIN;
+	        	utility[j+1][i]=AIW_WIN;
+			
 
 	        }else if(moves_next[j][i>>1].utility==AIW_WIN || moves_next[j][i>>1].utility==-AIW_WIN ){
-	        	moves_next[j+1][i].utility=AIW_WIN;
+	        	//moves_next[j+1][i].utility=AIW_WIN;
+	        	utility[j+1][i]=AIW_WIN;
                 /* Otherwise, search deeper */
                 }else  {
 
@@ -132,7 +134,8 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
                         //        return moves->utility;
                         //}
                         //moves_next = func(b_next);
-	        	ai_threats(&b_next[j+1][i],&moves_next[j+1][i],&index1[0]);
+	        	ai_threats(b_next,j+1,i,moves_next,index);
+			utility[j+1][i]=moves_next[j+1][i].utility;
 	        	
                         //aim->weight = df_search(&b_next, &moves_next, index,player,
                         //                        depth - 1, next_ci, searched,
@@ -140,7 +143,8 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
                         //aimoves_free(moves_next);
                 }
                         if (b_next[j+1][i].turn != b->turn)
-	        		moves_next[j+1][i].utility=-moves_next[j+1][i].utility;
+	        		//moves_next[j+1][i].utility=-moves_next[j+1][i].utility;
+	        		utility[j+1][i]=-moves_next[j+1][i].utility;
 	        	//if (moves_next[j+1][i].utility >= AIW_WIN)
 	        	//	moves_next[j+1][i].utility=AIW_WIN;
 
@@ -155,19 +159,21 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
                 //}
 
                 //board_free(b_next);
-                if (aim->weight > alpha) {
-                        alpha = aim->weight;
-                        //cache_set(cache_index, aim);
+                //if (aim->weight > alpha) {
+                //        alpha = aim->weight;
+                //        //cache_set(cache_index, aim);
 
-                        /* Victory abort */
-                        if (alpha >= AIW_WIN)
-                                return AIW_WIN;
+                //        /* Victory abort */
+                //        if (alpha >= AIW_WIN)
+                //                return AIW_WIN;
 
-                        /* Alpha-beta pruning */
-                        if (alpha >= beta)
-                                return alpha;
-                }
+                //        /* Alpha-beta pruning */
+                //        if (alpha >= beta)
+                //                return alpha;
+                //}
 	//printf("%d %d %d\n",j,i,moves_next[j+1][i].utility);
+		}else //moves_next[j+1][i].utility=AIW_WIN;
+			utility[j+1][i]=AIW_WIN;
         }
 	}
 	for(j=depth-1;j>0;j--){
@@ -177,27 +183,42 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,unsigned int *index, Player *
 		//printf("branches %d player %d\n",branches,b_next[j+1][i].turn);
         for (i = 0; i < branches; i=i+2) {
 		if (b_next[j+1][i].turn != b->turn)
-		moves_next[j][i>>1].utility=maxi(moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
+		//moves_next[j][i>>1].utility=mini(moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
+		utility[j][i>>1]=mini(utility[j+1][i],utility[j+1][i+1]);
 		else 
-		moves_next[j][i>>1].utility=mini(moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
+		//moves_next[j][i>>1].utility=maxi(moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
+		utility[j][i>>1]=maxi(utility[j+1][i],utility[j+1][i+1]);
+	
 	//printf("%d %d\n",moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
 	}
 	}
+	
+	//for(i=0;i<branch;i++){
+	//moves_next[0][0].data[i].x=moves->data[i].x;
+	//moves_next[0][0].data[i].y=moves->data[i].y;
+	//moves_next[0][0].data[i].weight=moves->data[i].weight;
+	//}
+	//moves_next[0][0].utility=moves->utility;
+	//moves_next[0][0].len=branch;
 	for(i=0;i<branch;i++){
-	moves->data[i].weight=moves_next[1][i].utility;
+	moves->data[i].x=moves_next[0][0].data[i].x;
+	moves->data[i].y=moves_next[0][0].data[i].y;
+	//moves->data[i].weight=moves_next[1][i].utility;
+	moves->data[i].weight=utility[1][i];
 	}
+	moves->len=branch;
 
         return alpha;
 }
 
-int  search(const Board *b, AIMove *move, Player *player)
+int  search(Board *b, AIMove *move, Player *player)
 {
 	AIMoves moves;
 	#pragma internal_blockram moves
+	moves.len=0;
         Board copy;
 	#pragma internal_blockram copy
-	unsigned int index[361]={0};
-		#pragma bitsize index 9
+	index_array index={0};
 		#pragma internal_fast index
         //AIFunc move_func = ai(player->ai)->func;
 
@@ -251,14 +272,14 @@ int  search(const Board *b, AIMove *move, Player *player)
         //cache_best = AIW_MIN;
         //copy = board_new();
         board_copy(b, &copy);
-	ai_threats(&copy,&moves,&index[0]);
+	//ai_threats(&copy,&moves,&index);
 
         //if (player->search == SEARCH_DFS) {
-                df_search(&copy, &moves, &index[0],player, player->depth, 0,
+                df_search(&copy, &moves, &index,player, player->depth, 0,
                           PIECE_SEARCHED, AIW_LOSE, AIW_WIN);
 	//printf("%d %d \n",moves.data[0].weight,moves.data[1].weight);
 	int ret_val;
-	ret_val=aimoves_choose(&moves, move,&index[0]);
+	ret_val=aimoves_choose(&moves, move,&index);
 	if (!ret_val)
 		return 0;
 	else return 1;		

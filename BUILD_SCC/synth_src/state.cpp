@@ -213,7 +213,7 @@ int aimoves_compare(const void *a, const void *b)
         return ((AIMove*)b)->weight - ((AIMove*)a)->weight;
 }
 
-int aimoves_choose(AIMoves *moves, AIMove *move,unsigned int *index)
+int aimoves_choose(AIMoves *moves, AIMove *move,index_array *index)
 {
 	//#pragma read_write_ports moves.data combined 3
 	//#pragma internal_blockram moves

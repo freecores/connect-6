@@ -348,7 +348,7 @@ FIFO(queue,AIMove);
 #pragma fifo_length pico_stream_output_queue 800
 #pragma bandwidth pico_stream_input_queue 1
 #pragma bandwidth pico_stream_output_queue 1
-/*AIMoves*/int ai_threats(Board *board,AIMoves *moves,unsigned int *index)
+/*AIMoves*/int ai_threats(Board board[5][16],int depth,int branch,AIMoves moves[5][16],index_array *index)
 {
 	//#pragma read_write_ports board.data combined 2
 	//#pragma internal_blockram board
@@ -356,7 +356,6 @@ FIFO(queue,AIMove);
 
 	//#pragma internal_blockram move
 	//#pragma no_memory_analysis move
-		#pragma bitsize index 9
 		#pragma internal_fast index
 	
 	/////////* All threat functions work on this board */
@@ -376,14 +375,14 @@ FIFO(queue,AIMove);
 	//#pragma internal_blockram moves
 	//#pragma no_memory_analysis moves
 
-	moves->len=0;
+	moves[depth][branch].len=0;
         //AIMoves moves;
         AIWEIGHT u_sum = 0;
         int i;
 
         //b = board_new();
 	//Board b;
-        board_copy(board, &b);
+        board_copy(&board[depth][branch], &b);
 
         /* Clear threat tallys */
         //for (i = 0; i < connect_k; i++) {
@@ -533,9 +532,9 @@ FIFO(queue,AIMove);
 	#pragma internal_blockram moves1
         /*moves = */ ai_marks(&bwrite, PIECE_THREAT(1),&moves1);
 	//test(ready);
-	streamsort(moves,index);
+	streamsort(&moves[depth][branch],index);
         moves1.utility = u_sum;
-        moves->utility = u_sum;
+        moves[depth][branch].utility = u_sum;
 	/*----------------------------
 		rewritten for hardware
 	----------------------------*/
@@ -687,7 +686,7 @@ FIFO(queue,AIMove);
 	//	}
 	
 }
-void streamsort(AIMoves *moves,unsigned int *index){
+void streamsort(AIMoves *moves,index_array *index){
 /* Insertion sort for streaming*/
 		AIMove val;
 		AIMove data[361]={{-1},{-1},{-1}};
@@ -737,7 +736,7 @@ void streamsort(AIMoves *moves,unsigned int *index){
 					break;
 					}
 				}
-					index[i]=len;
+					index->data[i]=len;
 					moves->data[i]=val;
 					len++;
 				//cout<<"STREAMSORT"<<":";
@@ -803,13 +802,13 @@ static gboolean is_adjacent( Board *b, BCOORD x, BCOORD y, int dist)
 	//#pragma internal_blockram moves
 	//#pragma no_memory_analysis moves
         //AIMove move;
-	unsigned int index[1]={0};
+	index_array  index={0};
         //AIMoves *moves;
 	moves.len=0;
         /* Get all open tiles adjacent to any piece */
         /*moves =*/ enum_adjacent(b, 1,&moves,current_random);
         if (moves.len){
-        	aimoves_choose(&moves, move,&index[0]);
+        	aimoves_choose(&moves, move,&index);
 		
                 return ;//moves;
 	}

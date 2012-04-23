@@ -463,7 +463,7 @@ void streamsort(AIMoves *moves,index_array *index);
 ///////////AIMoves *ai_dfs_utility(const Board *b);
 ////////////* Utility function */
 ///////////
-/*AIMoves **/int ai_threats(Board board[5][16],int depth,int branch,AIMoves moves[5][16],index_array *index);
+/*AIMoves **/int ai_threats(Board board[2][16],int depth,int branch,AIMoves moves[2][16],index_array *index);
 AIMoves *ai_priority(const Board *b);
 /* Multi-level threats */
 

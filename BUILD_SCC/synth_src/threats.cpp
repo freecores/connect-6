@@ -348,7 +348,7 @@ FIFO(queue,AIMove);
 #pragma fifo_length pico_stream_output_queue 800
 #pragma bandwidth pico_stream_input_queue 1
 #pragma bandwidth pico_stream_output_queue 1
-/*AIMoves*/int ai_threats(Board board[5][16],int depth,int branch,AIMoves moves[5][16],index_array *index)
+/*AIMoves*/int ai_threats(Board board[2][16],int depth,int branch,AIMoves moves[2][16],index_array *index)
 {
 	//#pragma read_write_ports board.data combined 2
 	//#pragma internal_blockram board

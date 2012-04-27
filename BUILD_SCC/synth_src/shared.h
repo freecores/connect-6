@@ -348,7 +348,7 @@ void aimoves_append(AIMoves *moves, const AIMove *aim);
 ///////////* Add an AIMove to an AIMoves array; existing moves weights will be
 //////////   overwritten */
 //////////
-int aimoves_choose(AIMoves *moves, AIMove *move, index_array *index);
+int aimoves_choose(AIMoves *moves, AIMove *move/*, index_array *index*/);
 /* Will choose one of the best moves from a GArray of AIMove structures at
    random. Returns non-zero if a move was chosen or zero if a move could not
    be chosen for some reason. */
@@ -463,7 +463,7 @@ void streamsort(AIMoves *moves,index_array *index);
 ///////////AIMoves *ai_dfs_utility(const Board *b);
 ////////////* Utility function */
 ///////////
-/*AIMoves **/int ai_threats(Board board[2][16],int depth,int branch,AIMoves moves[2][16],index_array *index);
+/*AIMoves **/int ai_threats(Board board[2][16],int depth,int branch,AIMoves moves[2][16]/*,index_array *index*/);
 AIMoves *ai_priority(const Board *b);
 /* Multi-level threats */
 
@@ -488,4 +488,5 @@ typedef struct {
         int depth, branch, cache, tss;
 } Player;
 /*AIMoves **/int search(Board *board,AIMove *move, Player *player);
+AIWEIGHT df_search(Board *b, AIMoves *moves,/*index_array *index,*/ Player *player,int depth, int cache_index,PIECE searched, AIWEIGHT alpha, AIWEIGHT beta);
 #endif

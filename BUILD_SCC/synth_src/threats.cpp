@@ -348,7 +348,7 @@ FIFO(queue,AIMove);
 #pragma fifo_length pico_stream_output_queue 800
 #pragma bandwidth pico_stream_input_queue 1
 #pragma bandwidth pico_stream_output_queue 1
-/*AIMoves*/int ai_threats(Board board[2][16],int depth,int branch,AIMoves moves[2][16],index_array *index)
+/*AIMoves*/int ai_threats(Board board[2][16],int depth,int branch,AIMoves moves[2][16]/*,index_array *index*/)
 {
 	//#pragma read_write_ports board.data combined 2
 	//#pragma internal_blockram board
@@ -356,6 +356,7 @@ FIFO(queue,AIMove);
 
 	//#pragma internal_blockram move
 	//#pragma no_memory_analysis move
+	index_array  index={0};
 		#pragma internal_fast index
 	
 	/////////* All threat functions work on this board */
@@ -532,7 +533,7 @@ FIFO(queue,AIMove);
 	#pragma internal_blockram moves1
         /*moves = */ ai_marks(&bwrite, PIECE_THREAT(1),&moves1);
 	//test(ready);
-	streamsort(&moves[depth][branch],index);
+	streamsort(&moves[depth][branch],&index);
         moves1.utility = u_sum;
         moves[depth][branch].utility = u_sum;
 	/*----------------------------
@@ -808,7 +809,7 @@ static gboolean is_adjacent( Board *b, BCOORD x, BCOORD y, int dist)
         /* Get all open tiles adjacent to any piece */
         /*moves =*/ enum_adjacent(b, 1,&moves,current_random);
         if (moves.len){
-        	aimoves_choose(&moves, move,&index);
+        	aimoves_choose(&moves, move/*,&index*/);
 		
                 return ;//moves;
 	}

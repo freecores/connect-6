@@ -219,7 +219,7 @@ int main(int argc, char **argv){
         connect6ai(board,AI_colour,move);
 	movecount++;
         cout<<"AI MOVE: "<<move[0]<<move[1]<<move[2]<<move[3]<<endl;
-	//if(movecount >=20) return 0 ; //reducing length of simulation
+	if(movecount >=20) return 0 ; //reducing length of simulation
         winning_colour = check_for_win(board);
         if (winning_colour == AI_colour){
             cout<<"AI has won! " << movecount << " moves " << "Exiting."<<endl;

@@ -30,9 +30,17 @@ int mini(int x,int y){
 int maxi(int x,int y){
 	return (x>=y)?x:y;
 }
-static AIWEIGHT df_search(Board *b, AIMoves *moves,index_array *index, Player *player,
-                          int depth, int cache_index,
-                          PIECE searched, AIWEIGHT alpha, AIWEIGHT beta)
+int mod2(int x){
+#pragma bitsize x 5
+int ans[16]={0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1};
+return ans[x];
+}
+int mod5(int x){
+#pragma bitsize x 5
+int ans[16]={0,1,2,3,4,0,1,2,3,4,0,1,2,3,4,0};
+return ans[x];
+}
+/*static*/ AIWEIGHT df_search(Board *b, AIMoves *moves,/*index_array *index,*/ Player *player,int depth, int cache_index, PIECE searched, AIWEIGHT alpha, AIWEIGHT beta)
 /* Depth is in _moves_ */
 {
 		#pragma internal_fast index
@@ -44,11 +52,12 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,index_array *index, Player *p
         AIMoves moves_next[2][16];
 	#pragma internal_fast moves_next
 	AIWEIGHT utility[5][16];
+	#pragma internal_blockram utility
 	PIECE turn[5]={b->turn};
 	int branch=player->branch;
 
         board_copy(b, &b_next[0][0]);
-	ai_threats(b_next,0,0,moves_next,index);
+	ai_threats(b_next,0,0,moves_next/*,index*/);
 	utility[0][0]=moves_next[0][0].utility;
 	turn[0]=b->turn;
 	for(i=0;i<branch;i++){
@@ -80,15 +89,18 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,index_array *index, Player *p
 		for(k=0;k<j+1;k++) branches*=branch;
 		//int branches=(player->branch)^j;
 		//printf("branches %d\n",branches);
-		int current_j=j % 2;
-		int next_j=(j+1) % 2;
+		//int current_j=j % 2;
+		//int next_j=(j+1) % 2;
+		int current_j=mod2(j);
+		int next_j=mod2(j+1);
 		if (b_next[current_j][0].moves_left <= 0) turn[j]=other_player(b_next[current_j][0].turn);
 		else turn[j]=b_next[current_j][0].turn;
 		
         for (i = 0; i < branches; i++) {
 		//if(!(moves_next[j][i>>1].utility==AIW_WIN || moves_next[j][i>>1].utility==-AIW_WIN)){
 		if(!(utility[j][i>>1]==AIW_WIN || utility[j][i>>1]==-AIW_WIN)){
-                AIMove aim = *(moves_next[current_j][i>>1].data + (i % branch));
+                //AIMove aim = *(moves_next[current_j][i>>1].data + (i % branch));
+                AIMove aim = *(moves_next[current_j][i>>1].data + mod2(i));
 		//printf ("aim->utility %d \n",utility[j][i>>1]);
 		
                 board_copy(&b_next[current_j][i>>1], &b_next[next_j][i]);
@@ -148,7 +160,7 @@ static AIWEIGHT df_search(Board *b, AIMoves *moves,index_array *index, Player *p
                         //        return moves->utility;
                         //}
                         //moves_next = func(b_next);
-	        	ai_threats(b_next,next_j,i,moves_next,index);
+	        	ai_threats(b_next,next_j,i,moves_next/*,index*/);
 			utility[j+1][i]=moves_next[next_j][i].utility;
 	        	
                         //aim->weight = df_search(&b_next, &moves_next, index,player,
@@ -233,7 +245,7 @@ int  search(Board *b, AIMove *move, Player *player)
 	moves.len=0;
         Board copy;
 	#pragma internal_blockram copy
-	index_array index={0};
+	/*index_array index={0};*/
 		#pragma internal_fast index
         //AIFunc move_func = ai(player->ai)->func;
 
@@ -290,11 +302,11 @@ int  search(Board *b, AIMove *move, Player *player)
 	//ai_threats(&copy,&moves,&index);
 
         //if (player->search == SEARCH_DFS) {
-                df_search(&copy, &moves, &index,player, player->depth, 0,
+                df_search(&copy, &moves, /*&index,*/player, player->depth, 0,
                           PIECE_SEARCHED, AIW_LOSE, AIW_WIN);
 	//printf("FINAL WEIGHTS %d %d \n\n",moves.data[0].weight,moves.data[1].weight);
 	int ret_val;
-	ret_val=aimoves_choose(&moves, move,&index);
+	ret_val=aimoves_choose(&moves, move/*,&index*/);
 	if (!ret_val)
 		return 0;
 	else return 1;		

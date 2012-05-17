@@ -637,7 +637,7 @@ gboolean check_win_full(const Board *b, BCOORD x, BCOORD y,
         int i, c1, c2, xs[] = {1, 1, 0, -1}, ys[] = {0, 1, 1, 1};
         PIECE type;
 	PIECE p;
-
+	if(x<0 || y<0) return FALSE;
         type = piece_at(b, x, y);
         if (type != PIECE_BLACK && type != PIECE_WHITE)
                 return FALSE;

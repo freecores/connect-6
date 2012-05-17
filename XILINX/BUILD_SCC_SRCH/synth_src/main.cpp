@@ -28,21 +28,12 @@
 #endif
 #include "shared.h"
 
-#ifndef EMUL
 // The AI has as much time as it wants, but moves after 1 second. Default is to wait 2 seconds
 #define AI_WAIT_TIME 0.1
 
 // FPGA has 1 second to make its move
 #define MOVE_TIME_LIMIT 0.1
-#endif
 
-#ifdef EMUL
-// The AI has as much time as it wants, but moves after 1 second. Default is to wait 2 seconds
-#define AI_WAIT_TIME 0.1
-
-// FPGA has 1 second to make its move
-#define MOVE_TIME_LIMIT 1
-#endif
 using namespace std;
 extern "C" int main(int argc, char **argv);
 // commandline option: -port <serialport>
@@ -134,12 +125,6 @@ int main(int argc, char **argv){
         board[y][x] = FPGA_colour;
         print_board(board);
         print_board_file(board);
-#ifdef EMUL
-	if(move[0]!=moveportout[0]||move[1]!=moveportout[1]||move[2]!=moveportout[2]||move[3]!=moveportout[3]) {
-		printf("EMULATION FAIL: BEHAVIOUR Doesn't match \"%c%c%c%c\" X \"%c%c%c%c\"\n",move[0],move[1],move[2],move[3],moveportout[0],moveportout[1],moveportout[2],moveportout[3]);
-		//exit(1);
-	}
-#endif
         wait(AI_WAIT_TIME);
 
 
@@ -200,12 +185,6 @@ int main(int argc, char **argv){
         }
         y = char_to_int(move[0])*10 + char_to_int(move[1]) - 1;
         x = char_to_int(move[2])*10 + char_to_int(move[3]) - 1;
-#ifdef EMUL
-	if(move[0]!=moveportout[0]||move[1]!=moveportout[1]||move[2]!=moveportout[2]||move[3]!=moveportout[3]) {
-		printf("EMULATION FAIL: BEHAVIOUR Doesn't match \"%c%c%c%c\" X \"%c%c%c%c\"\n",move[0],move[1],move[2],move[3],moveportout[0],moveportout[1],moveportout[2],moveportout[3]);
-		//exit(1);
-	}
-#endif
         if (check_move_validity(board,y,x) < 0) break;
         board[y][x] = FPGA_colour;
         winning_colour = check_for_win(board);
@@ -241,12 +220,6 @@ int main(int argc, char **argv){
         }
         y = char_to_int(move[0])*10 + char_to_int(move[1]) - 1;
         x = char_to_int(move[2])*10 + char_to_int(move[3]) - 1;
-#ifdef EMUL
-	if(move[0]!=moveportout[4]||move[1]!=moveportout[5]||move[2]!=moveportout[6]||move[3]!=moveportout[7]) {
-		printf("EMULATION FAIL: BEHAVIOUR Doesn't match \"%c%c%c%c\" X \"%c%c%c%c\"\n",move[0],move[1],move[2],move[3],moveportout[4],moveportout[5],moveportout[6],moveportout[7]);
-		//exit(1);
-	}
-#endif
         if (check_move_validity(board,y,x) < 0) break;
         board[y][x] = FPGA_colour;
         winning_colour = check_for_win(board);

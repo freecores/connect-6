@@ -32,8 +32,12 @@ int maxi(int x,int y){
 }
 int mod2(int x){
 #pragma bitsize x 5
-int ans[16]={0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1};
-return ans[x];
+int y;
+#pragma bitsize y 5
+////int ans[32]={0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1};
+//int ans[32]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+//return ans[x+16];
+y=x & 1;
 }
 int mod5(int x){
 #pragma bitsize x 5
@@ -58,14 +62,14 @@ return ans[x];
 	int branch=player->branch;
 
         board_copy(b, &b_next[0][0]);
-	ai_threats(b_next,0,0,moves_next/*,index*/);
-	utility[0][0]=moves_next[0][0].utility;
-	turn[0]=b->turn;
-	for(i=0;i<branch;i++){
-	moves->data[i].x=moves_next[0][0].data[i].x;
-	moves->data[i].y=moves_next[0][0].data[i].y;
-	//moves->data[i].weight=moves_next[1][i].utility;
-	}
+	//ai_threats(b_next,0,0,moves_next/*,index*/);
+	//utility[0][0]=moves_next[0][0].utility;
+	//turn[0]=b->turn;
+	//for(i=0;i<branch;i++){
+	//moves->data[i].x=moves_next[0][0].data[i].x;
+	//moves->data[i].y=moves_next[0][0].data[i].y;
+	////moves->data[i].weight=moves_next[1][i].utility;
+	//}
 
         ///* Search only the top moves beyond the minimum */
         ////aimoves_sort(moves);
@@ -79,13 +83,13 @@ return ans[x];
 
         /* No moves left -- its a draw */
 	
-        if (moves_next[0][0].len < 1)                //"(%s)", bcoords_to_string(aim->x, aim->y));
+        //if (moves_next[0][0].len < 1)                //"(%s)", bcoords_to_string(aim->x, aim->y));
 
-                return AIW_DRAW;
+          //      return AIW_DRAW;
                 //board_copy(b, &b_next[0][0]);
 
         /* Search each move available in depth first order */
-	for(j=0;j<depth;j++){
+	for(j=-1;j<depth;j++){
 		int k,branches=1;
 		for(k=0;k<j+1;k++) branches*=branch;
 		//int branches=(player->branch)^j;
@@ -94,16 +98,18 @@ return ans[x];
 		//int next_j=(j+1) % 2;
 		int current_j=mod2(j);
 		int next_j=mod2(j+1);
-		if (b_next[current_j][0].moves_left <= 0) turn[j]=other_player(b_next[current_j][0].turn);
-		else turn[j]=b_next[current_j][0].turn;
-		
+		if(j!=-1){
+		if (b_next[current_j][0].moves_left <= 0) turn[j+1]=other_player(b_next[current_j][0].turn);
+		else turn[j+1]=b_next[current_j][0].turn;
+		}else turn[0]=b->turn;
         for (i = 0; i < branches; i++) {
 		//if(!(moves_next[j][i>>1].utility==AIW_WIN || moves_next[j][i>>1].utility==-AIW_WIN)){
-		if(!(utility[j][i>>1]==AIW_WIN || utility[j][i>>1]==-AIW_WIN)){
-                //AIMove aim = *(moves_next[current_j][i>>1].data + (i % branch));
-                AIMove aim = *(moves_next[current_j][i>>1].data + mod2(i));
+		AIMove aim;
+		//////////////////////////////////////////////////////////if(!(utility[j][i>>1]==AIW_WIN || utility[j][i>>1]==-AIW_WIN)){
+		if(j!=-1){
+                //aim = *(moves_next[current_j][i>>1].data + (i % branch));
+                aim = *(moves_next[current_j][i>>1].data + mod2(i));
 		//printf ("aim->utility %d \n",utility[j][i>>1]);
-		
                 board_copy(&b_next[current_j][i>>1], &b_next[next_j][i]);
 		//if(moves_next[j][i/2].len<branch) printf ("caca");
 		//printf("%d %d\n",aim.x,aim.y);
@@ -125,34 +131,36 @@ return ans[x];
 
                 //b_next = board_new();
                 place_piece(&b_next[next_j][i], aim.x, aim.y);
-                        AIWEIGHT next_alpha = alpha, next_beta = beta;
+                        //AIWEIGHT next_alpha = alpha, next_beta = beta;
                         //AIFunc func;
 
-
+		}else{ 
+			aim.x=-1;aim.y=-1;	
                         /* Player has changed */
 		//printf("depth %d branches %d turn %d \n\n",j,branches,turn[j]);
                         if (b_next[next_j][i].moves_left <= 0) {
                                 b_next[next_j][i].moves_left = place_p;
                                 b_next[next_j][i].turn = other_player(b_next[current_j][i].turn);
                                 searched++;
-                                next_alpha = -beta;
-                                next_beta = -alpha;
+                                //next_alpha = -beta;
+                                //next_beta = -alpha;
                         }
                         b_next[next_j][i].moves_left--;
 
+		}
                 /* Did we win? */
 		
-                if (check_win_full(&b_next[1][i], aim.x, aim.y,0,0,0,0)){
+                if (check_win_full(&b_next[next_j][i], aim.x, aim.y,0,0,0,0)){
                         aim.weight = AIW_WIN;
 	        	moves_next[next_j][i].utility=AIW_WIN;
 	        	utility[j+1][i]=AIW_WIN;
 			
 
-	        //}else if(moves_next[j][i>>1].utility==AIW_WIN || moves_next[j][i>>1].utility==-AIW_WIN ){
-	        }else if(utility[j][i>>1]==AIW_WIN || utility[j][i>>1]==-AIW_WIN ){
-	        	//moves_next[j+1][i].utility=AIW_WIN;
-	        	utility[j+1][i]=AIW_WIN;
-                /* Otherwise, search deeper */
+	        /////////////////////////////////////////////////////////////////}else if(moves_next[j][i>>1].utility==AIW_WIN || moves_next[j][i>>1].utility==-AIW_WIN ){
+	        /////////////////////////////////////////////////////////////////}else if(utility[j][i>>1]==AIW_WIN || utility[j][i>>1]==-AIW_WIN ){
+	        /////////////////////////////////////////////////////////////////	//moves_next[j+1][i].utility=AIW_WIN;
+	        /////////////////////////////////////////////////////////////////	utility[j+1][i]=AIW_WIN;
+                //////////////////////////////////////////////////////////////////* Otherwise, search deeper */
                 }else  {
 
                         //func = ai(player->ai)->func;
@@ -199,17 +207,26 @@ return ans[x];
                 //                return alpha;
                 //}
 	//printf("%d %d %d\n",j,i,moves_next[j+1][i].utility);
-		}else //moves_next[j+1][i].utility=AIW_WIN;
-			utility[j+1][i]=AIW_WIN;
+		/////////////////////////////////////////////////////////////}else //moves_next[j+1][i].utility=AIW_WIN;
+		/////////////////////////////////////////////////////////////	utility[j+1][i]=AIW_WIN;
         }
+	if(j==-1){
+		for(k=0;k<branch;k++){
+		moves->data[k].x=moves_next[0][0].data[k].x;
+		moves->data[k].y=moves_next[0][0].data[k].y;
+		//moves->data[i].weight=moves_next[1][i].utility;
+		}
+        if (moves_next[0][0].len < 1)              
+	      return AIW_DRAW;
+	}
 	}
 	for(j=depth-2;j>=0;j--){
 		int k,branches=1;
 		for(k=0;k<j+1;k++) branches*=branch;
 		//int branches=(player->branch)^j;
-		//printf("branches %d player %d\n",branches,b_next[j+1][i].turn);
         for (i = 0; i < branches; i=i+2) {
 		//if (b_next[next_j][i].turn != b->turn)
+		//printf("branches %d player %d %d %d\n",branches,b_next[j+1][i].turn,j,i);
 		if (turn[j] != b->turn)
 		//moves_next[j][i>>1].utility=mini(moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
 		utility[j][i>>1]=mini(utility[j+1][i],utility[j+1][i+1]);
@@ -217,7 +234,7 @@ return ans[x];
 		//moves_next[j][i>>1].utility=maxi(moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
 		utility[j][i>>1]=maxi(utility[j+1][i],utility[j+1][i+1]);
 	
-	//printf("%d %d\n",moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
+		//printf("%d %d\n",moves_next[j+1][i].utility,moves_next[j+1][i+1].utility);
 	}
 	}
 	

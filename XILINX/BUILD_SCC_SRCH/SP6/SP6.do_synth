@@ -31,9 +31,9 @@ if [ $run_logic_synthesis_only -ne 1 ] ; then
     cd run/implementation
     ngdbuild -uc ../../SP6.ucf -sd ../../../../coregen/ip_rtl/ -dd _ngo -nt timestamp -p xc6slx45t-fgg484-3 ../synthesis/DE2.edf DE2.ngd
     if [[ $? != 0 ]]; then exit 1; fi
-    map -u -timing -p xc6slx45t-fgg484-3  -ol high -pr b -detail -o DE2_map.ncd DE2.ngd DE2.pcf
+	map -u -timing -p xc6slx45t-fgg484-3  -ol high -pr off -detail -logic_opt on -xe n -xt 0 -register_duplication on -r 4 -global_opt off -ir all  -lc off -power off -mt 2  -o DE2_map.ncd DE2.ngd DE2.pcf
     if [[ $? != 0 ]]; then exit 1; fi
-    par -ol high -w -nopad DE2_map.ncd DE2.ncd DE2.pcf
+    par -ol high -xe n -mt 4 -w -nopad DE2_map.ncd DE2.ncd DE2.pcf
     if [[ $? != 0 ]]; then exit 1; fi
     trce -v 20 -u 64 -o DE2.twr DE2.ncd DE2.pcf
     if [[ $? != 0 ]]; then exit 1; fi

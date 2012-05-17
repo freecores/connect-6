@@ -48,7 +48,7 @@ clean:
 
 
 #first the c/c++ source should be compiled
-fpga: synth altera_synth test
+fpga: synth xilinx_synth test
 	cp cp ./rtl_package/synth/altera_fpga/run/DE2.sof ../DEMO
 
 synth: imp_connect.tag
